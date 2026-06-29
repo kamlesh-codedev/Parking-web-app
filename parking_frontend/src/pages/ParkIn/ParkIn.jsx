@@ -16,7 +16,7 @@ const ParkIn = () => {
   const [loading, setLoading] = useState(false);
 
   // API Base URL (adjust if your port is different)
-  const API_BASE = "http://localhost:5000/park-in";
+  const API_BASE = "http://127.0.0.1:5000/park-in";
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -29,32 +29,39 @@ const ParkIn = () => {
 
   // ── SEARCH: GET DETAILS ──
   const handleSearchDetails = async () => {
-    if (!vehicleData.vehicleNumber) return alert("Enter Vehicle Number");
-    
+    if (!vehicleData.vehicleNumber) {
+      alert("Enter Vehicle Number");
+      return;
+    }
+
     setLoading(true);
+
     try {
-      // Using POST because backend uses request.get_json() which requires a body
-      const response = await fetch(`${API_BASE}/get-details`, {
-        method: 'GET', // Keep GET as per your decorator, though body is sent
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vehicle_number: vehicleData.vehicleNumber })
-      });
-      
+      const response = await fetch(
+        `${API_BASE}/get-details?vehicle_no=${encodeURIComponent(vehicleData.vehicleNumber)}`
+      );
+
       const data = await response.json();
-      
+
+      if (!response.ok) {
+        alert(data.message || "Vehicle details not found");
+        return;
+      }
+
       if (data.status === "success") {
         setVehicleData({
           vehicleNumber: data.message.vehicle_number,
           vehicleName: data.message.vehicle_name,
           phoneNumber: data.message.phone_number,
           parkingAmount: data.message.amount,
-          isPrepaid: false, // Default or adjust as needed
+          isPrepaid: false,
         });
       } else {
-        alert(data.message || "Vehicle details not found");
+        alert(data.message);
       }
     } catch (error) {
       console.error("Error fetching details:", error);
+      alert("Unable to connect to server");
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, Float, Integer, String
 from database import db_session
 from models import Base
-from services import delete_invoice
+from services.pdf_handling import delete_invoice
 import os
 
 

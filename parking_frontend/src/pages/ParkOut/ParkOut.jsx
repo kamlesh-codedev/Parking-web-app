@@ -19,7 +19,7 @@ import logo from '../../assets/kk-logo.png';
    API CONFIGURATION — change BASE_URL only
 ───────────────────────────────────────────────────────────── */
 const API = {
-  BASE_URL:      "https://your-backend-url.com",
+  BASE_URL:      "http://127.0.0.1:5000/park-out",
   VEHICLE_LIST:  "/",
   GENERATE_BILL: "/generate-bill",
   SEND_MSG:      "/send-msg",

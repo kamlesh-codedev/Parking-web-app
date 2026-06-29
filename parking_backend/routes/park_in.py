@@ -6,8 +6,7 @@ park_in_bp = Blueprint('park-in',__name__)
 
 @park_in_bp.route('/get-details',methods=['GET'])
 def get_vehicle_details():
-    data = request.get_json()
-    vehicle_no = data.get("vehicle_number")
+    vehicle_no = request.args.get("vehicle_no")
     session["vehicle_no"] = vehicle_no
     session["bill_no"] = get_bill_number()
     if not vehicle_no:

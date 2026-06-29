@@ -8,7 +8,7 @@ from routes import park_in_bp,park_out_bp,saved_msg_bp
 app = Flask(__name__)
 app.config.from_object(Config)
 
-CORS(app, supports_credentials=True)
+CORS(app, origins=["http://localhost:5173"])
 init_db()
 
 app.register_blueprint(park_in_bp, url_prefix="/park-in")
