@@ -16,7 +16,7 @@ const ParkIn = () => {
   const [loading, setLoading] = useState(false);
 
   // API Base URL (adjust if your port is different)
-  const API_BASE = "http://127.0.0.1:5000/park-in";
+  const API_BASE = "http://localhost:5000/park-in";
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -38,7 +38,10 @@ const ParkIn = () => {
 
     try {
       const response = await fetch(
-        `${API_BASE}/get-details?vehicle_no=${encodeURIComponent(vehicleData.vehicleNumber)}`
+        `${API_BASE}/get-details?vehicle_no=${encodeURIComponent(vehicleData.vehicleNumber)}`,
+        {
+          credentials: "include"
+        }
       );
 
       const data = await response.json();
@@ -47,7 +50,9 @@ const ParkIn = () => {
         alert(data.message || "Vehicle details not found");
         return;
       }
-
+      setVehicleData({
+        bill_no: data.message.bill_no
+      })
       if (data.status === "success") {
         setVehicleData({
           vehicleNumber: data.message.vehicle_number,
@@ -75,6 +80,7 @@ const ParkIn = () => {
     try {
       const response = await fetch(`${API_BASE}/generate-bill`, {
         method: 'POST',
+        credentials: "include",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           vehicle_no: vehicleData.vehicleNumber,
@@ -91,7 +97,7 @@ const ParkIn = () => {
         setRegisteredVehicle({
           vehicleNumber: data.vehicle_no || vehicleData.vehicleNumber,
           vehicleName: data.vehicle_name || vehicleData.vehicleName,
-          billNumber: data.bill_no,
+          billNumber: data.bill_no || vehicleData.bill_no,
           phoneNumber: data.ph_no || vehicleData.phoneNumber,
           parkingAmount: data.amount || vehicleData.parkingAmount,
           isPrepaid: vehicleData.isPrepaid,
@@ -113,7 +119,7 @@ const ParkIn = () => {
   const handleSendMessage = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/send-msg`, { method: 'POST' });
+      const response = await fetch(`${API_BASE}/send-msg`, { method: 'POST', credentials: "include" });
       const data = await response.json();
       alert(data.message);
     } catch (error) {
@@ -127,7 +133,7 @@ const ParkIn = () => {
   const handleSaveMessage = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/save-msg`, { method: 'POST' });
+      const response = await fetch(`${API_BASE}/save-msg`, { method: 'POST' , credentials: "include" });
       const data = await response.json();
       alert(data.message);
     } catch (error) {

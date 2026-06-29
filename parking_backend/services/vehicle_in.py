@@ -11,7 +11,7 @@ import pyautogui
 import time
 
 def park_in_generate(bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no):
-    bill_no = int(bill_no)
+    bill_no = str(bill_no)
     vehicle_no = str(vehicle_no).strip().upper()
     vehicle_name = str(vehicle_name).strip().upper()
     amount = int(amount)
