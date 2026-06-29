@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #071426;
+}
+
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background: url("https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?q=80&w=1600")
+    center/cover no-repeat;
+}
+
+.background-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 20, 38, 0.82);
+}
+
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 450px;
+  padding: 35px;
+  border-radius: 20px;
+  background: rgba(16, 37, 68, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.25);
+}
+
+.logo {
+  display: block;
+  width: 180px;
+  height: auto;
+  background: transparent;
+  margin: 0 auto 12px auto;
+}
+
+.header h2 {
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.header p {
+  color: #bfc8d8;
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px solid #324e72;
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus {
+  border-color: #00d4ff;
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.12);
+}
+
+input::placeholder {
+  color: #a5b0c0;
+}
+
+.password-box {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.password-box input {
+  margin-bottom: 0;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  user-select: none;
+  font-family: 'Material Symbols Outlined';
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.eye-icon:hover {
+  color: #00d4ff;
+}
+
+.options {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  color: white;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.options a {
+  color: #00d4ff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.options a:hover {
+  opacity: 0.75;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #00d4ff;
+  color: #071426;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 0 24px rgba(0, 212, 255, 0.35);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 32px rgba(0, 212, 255, 0.55);
+  opacity: 0.93;
+}
+
+.footer-text {
+  margin-top: 20px;
+  color: #9db0c8;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
