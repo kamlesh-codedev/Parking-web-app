@@ -45,7 +45,7 @@ def generate_bill():
     if response.get("status")=="error":
         return jsonify(response), 500
     elif response.get("status") == "reserved":
-        return jsonify(response), 429
+        return jsonify(response), 409
     else:
         return jsonify(response), 200
 
