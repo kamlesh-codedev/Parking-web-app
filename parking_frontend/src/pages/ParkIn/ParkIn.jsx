@@ -16,7 +16,7 @@ const ParkIn = () => {
   const [registeredVehicle, setRegisteredVehicle] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // API Base URL
+  // API Base URL (adjust if your port is different)
   const API_BASE = "http://127.0.0.1:5000/park-in";
 
   // Live Calculations
@@ -69,7 +69,10 @@ const ParkIn = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${API_BASE}/get-details?vehicle_no=${encodeURIComponent(vehicleData.vehicleNumber)}`
+        `${API_BASE}/get-details?vehicle_no=${encodeURIComponent(vehicleData.vehicleNumber)}`,
+        {
+          credentials: "include"
+        }
       );
       const data = await response.json();
 
@@ -77,7 +80,6 @@ const ParkIn = () => {
         alert(data.message || "Vehicle details not found");
         return;
       }
-
       if (data.status === "success") {
         // FIX: use functional update so we merge onto the latest state
         // instead of a stale closure of vehicleData, which previously
@@ -108,6 +110,7 @@ const ParkIn = () => {
     try {
       const response = await fetch(`${API_BASE}/generate-bill`, {
         method: 'POST',
+        credentials: "include",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           vehicle_no: vehicleData.vehicleNumber,
@@ -137,7 +140,7 @@ const ParkIn = () => {
           parkInTime: new Date().toLocaleString(),
           status: currentParkingStatus,
         });
-        alert("Bill Generated Successfully!");
+        alert(data.message || "Bill Generated Successfully!");
       } else {
         alert(data.message || "Failed to generate bill");
       }
@@ -151,7 +154,7 @@ const ParkIn = () => {
   const handleSendMessage = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/send-msg`, { method: 'POST' });
+      const response = await fetch(`${API_BASE}/send-msg`, { method: 'POST', credentials: "include" });
       const data = await response.json();
       alert(data.message);
     } catch (error) {
@@ -164,7 +167,7 @@ const ParkIn = () => {
   const handleSaveMessage = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/save-msg`, { method: 'POST' });
+      const response = await fetch(`${API_BASE}/save-msg`, { method: 'POST' , credentials: "include" });
       const data = await response.json();
       alert(data.message);
     } catch (error) {

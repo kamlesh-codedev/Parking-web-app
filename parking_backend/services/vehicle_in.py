@@ -10,7 +10,7 @@ from services.print_bill import auto_print_pdf
 import pyautogui
 import time
 
-def park_in_generate (bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no,amount_due=None):
+def park_in_generate(bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no):
     bill_no = int(bill_no)
     vehicle_no = str(vehicle_no).strip().upper()
     vehicle_name = str(vehicle_name).strip().upper()
@@ -59,7 +59,8 @@ def park_in_generate (bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no,amoun
     pyautogui.press('enter')
     
     response={"status":"success",
-              "message":"Parking saved and printed successfully!"}
+              "message":"Parking saved and printed successfully!",
+              "bill_no":bill_no}
     return response
     
 def park_in_pdf(bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no):
