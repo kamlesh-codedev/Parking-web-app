@@ -28,7 +28,7 @@ import logo from "../../assets/kk-logo.png";
 /* ─────────────────────────────────────────────────────────────
    API CONFIGURATION
 ───────────────────────────────────────────────────────────── */
-const BASE_URL = "http://127.0.0.1:5000/park-out";
+const BASE_URL = "http://localhost:5000/park-out";
 
 const post = async (path, body = {}) => {
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -136,7 +136,7 @@ export default function ParkOut() {
   const [session,         setSession]         = useState(null);
   const [isSearched,      setIsSearched]      = useState(false);
   const [now,             setNow]             = useState(new Date());
-  
+
   const [loadingList,     setLoadingList]     = useState(false);
   const [loadingBill,     setLoadingBill]     = useState(false);
   const [loadingMsg,      setLoadingMsg]      = useState(false);
@@ -144,6 +144,11 @@ export default function ParkOut() {
   const [error,           setError]           = useState(null);
   const [successMsg,      setSuccessMsg]      = useState(null);
   const [showInvoice,     setShowInvoice]     = useState(false);
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentAmount,   setPaymentAmount]   = useState("0");
+  const [messageSent,     setMessageSent]     = useState(false);
+  const [messageSaved,    setMessageSaved]    = useState(false);
 
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [scanResult,      setScanResult]      = useState(null);
@@ -168,30 +173,79 @@ export default function ParkOut() {
 
   useEffect(() => { fetchVehicleList(); }, [fetchVehicleList]);
 
-  // Phase 1: Search Vehicle (Locks the selection)
-  const handleSearchVehicle = (manualVehicleNo) => {
+  const handleSearchVehicle = async (manualVehicleNo) => {
     const target = manualVehicleNo || selectedVehicle;
     if (!target) { showError("Please select a vehicle."); return; }
     if (manualVehicleNo) setSelectedVehicle(manualVehicleNo);
-    setIsSearched(true);
-    showSuccess("Vehicle locked. Ready to generate bill.");
-  };
 
-  // Phase 2: Generate Bill
-  const handleGenerateBill = async () => {
-    if (!selectedVehicle) return;
     setLoadingBill(true);
     try {
-      const data = await post("/generate-bill", { vehicle_number: selectedVehicle });
+      const data = await post("/generate-bill", { vehicle_number: target });
       if (data.status === "success") {
         setSession(data);
+        setIsSearched(true);
+        setPaymentCompleted(false);
+        setMessageSent(false);
+        setMessageSaved(false);
         showSuccess("Bill generated successfully.");
-      } else { showError(data.message || "Failed to generate bill."); }
-    } catch (err) { showError(`Generate bill error: ${err.message}`); }
-    finally { setLoadingBill(false); }
+      } else {
+        setSession(null);
+        setIsSearched(false);
+        showError(data.message || "Failed to generate bill.");
+      }
+    } catch (err) {
+      setSession(null);
+      setIsSearched(false);
+      showError(`Generate bill error: ${err.message}`);
+    } finally {
+      setLoadingBill(false);
+    }
   };
 
-  /* Scanner Logic */
+  const handleCompletePayment = () => {
+    if (!session?.vehicle_no) {
+      showError("Please generate a bill first.");
+      return;
+    }
+
+    setPaymentAmount("0");
+    setShowPaymentModal(true);
+  };
+
+  const submitPayment = async () => {
+    if (!session?.vehicle_no) {
+      showError("Please generate a bill first.");
+      return;
+    }
+
+    const amountPaid = Number(paymentAmount);
+    if (!Number.isFinite(amountPaid) || amountPaid < 0) {
+      showError("Please enter a valid amount paid.");
+      return;
+    }
+
+    setLoadingBill(true);
+    try {
+      const data = await post("/payment", {
+        vehicle_no: session.vehicle_no,
+        amount_paid: amountPaid,
+      });
+      if (data.status === "success") {
+        setPaymentCompleted(true);
+        setShowPaymentModal(false);
+        setMessageSent(false);
+        setMessageSaved(false);
+        showSuccess("Payment completed successfully.");
+      } else {
+        showError(data.message || "Failed to complete payment.");
+      }
+    } catch (err) {
+      showError(`Payment error: ${err.message}`);
+    } finally {
+      setLoadingBill(false);
+    }
+  };
+
   const startScanner = async () => {
     setIsScannerActive(true);
     setScanResult(null);
@@ -218,8 +272,12 @@ export default function ParkOut() {
     setLoadingMsg(true);
     try {
       const data = await post("/send-msg");
-      if (data.status === "success") showSuccess("Message sent successfully.");
-      else showError(data.message || "Failed to send message.");
+      if (data.status === "success") {
+        setMessageSent(true);
+        showSuccess("Message sent successfully.");
+      } else {
+        showError(data.message || "Failed to send message.");
+      }
     } catch (err) { showError(`Send error: ${err.message}`); }
     finally { setLoadingMsg(false); }
   };
@@ -228,8 +286,12 @@ export default function ParkOut() {
     setLoadingSave(true);
     try {
       const data = await post("/save-msg");
-      if (data.status === "success") showSuccess("Log saved.");
-      else showError(data.message || "Failed to save.");
+      if (data.status === "success") {
+        setMessageSaved(true);
+        showSuccess("Log saved.");
+      } else {
+        showError(data.message || "Failed to save.");
+      }
     } catch (err) { showError(`Save error: ${err.message}`); }
     finally { setLoadingSave(false); }
   };
@@ -242,11 +304,10 @@ export default function ParkOut() {
   const grossFee          = backendDailyAmt * backendDays;
   const statusColor       = session ? "#f59e0b" : "var(--c-on-surface-var)";
 
-  // Button State Logic
   const canSearch   = !isSearched && !loadingBill && !!selectedVehicle;
-  const canGenBill  = isSearched && !session && !loadingBill;
-  const canMsg      = !!session && !loadingMsg;
-  const canSave     = !!session && !loadingSave;
+  const canGenBill  = !!session && !paymentCompleted && !loadingBill;
+  const canMsg      = !!session && paymentCompleted && !messageSent && !loadingMsg;
+  const canSave     = !!session && paymentCompleted && !messageSaved && !loadingSave;
 
   return (
     <div className="po-root">
@@ -279,9 +340,30 @@ export default function ParkOut() {
 
         <div className="po-canvas">
           <div className="po-grid">
-            
-            {/* LEFT COLUMN: Session, Summary, and Actions */}
             <div className="po-col-left">
+              <div className="po-card">
+                <div className="po-section-head"><CreditCard size={20} color="#bec6e0" /><h3>Bill Summary</h3></div>
+                <div className="po-info-list" style={{ marginBottom: "16px" }}>
+                  <div className="po-info-row"><span className="po-info-label">Billing Days</span><span className="po-info-value po-info-muted">{session ? `${backendDays} day(s)` : "---"}</span></div>
+                  <div className="po-info-row"><span className="po-info-label">Daily Rate</span><span className="po-info-value po-info-muted">{session ? `₹${session.daily_amount ?? "0"}` : "---"}</span></div>
+                  <div className="po-info-row"><span className="po-info-label"><IndianRupee size={13} style={{ marginRight: 4 }} />Parking Amount</span><span className="po-info-value po-info-muted">{session ? `₹${grossFee.toFixed(2)}` : "---"}</span></div>
+                  <div className="po-info-row"><span className="po-info-label">Prepaid Amount</span><span className="pi-info-red">{session ? `-₹${session.prepaid ?? "0"}` : "---"}</span></div>
+                  <div className="po-info-row po-info-row-top-border"><span className="po-info-label">Remaining to Pay</span><span className="po-info-value po-info-muted">{session ? `₹${backendParkingFee.toFixed(2)}` : "---"}</span></div>
+                </div>
+                <div className="po-total-box"><p className="po-total-label">Final Amount To Collect</p><h2 className="po-total-amount">{session ? `₹${backendParkingFee.toFixed(2)}` : "₹0.00"}</h2></div>
+                <div className="po-inline-actions">
+                  <button onClick={handleCompletePayment} disabled={!canGenBill} className="po-inline-action-btn po-inline-action-btn-primary">
+                    {loadingBill ? <span className="po-spinner" /> : <Receipt size={16} />} Pay
+                  </button>
+                  <button onClick={handleSendMsg} disabled={!canMsg} className="po-inline-action-btn">
+                    {loadingMsg ? <span className="po-spinner" /> : <MessageSquare size={16} />} Msg
+                  </button>
+                  <button onClick={handleSaveMsg} disabled={!canSave} className="po-inline-action-btn">
+                    {loadingSave ? <span className="po-spinner" /> : <Save size={16} />} Save
+                  </button>
+                </div>
+              </div>
+
               <div className="po-card">
                 <div className="po-section-head"><Timer size={20} color="#bec6e0" /><h3>Parking Session</h3></div>
                 <div className="po-info-list">
@@ -295,33 +377,8 @@ export default function ParkOut() {
                   <div className="po-info-row"><span className="po-info-label"><BadgeCheck size={13} style={{ marginRight: 4 }} />Status</span><span className="po-info-value" style={{ color: statusColor, fontWeight: 600 }}>{session?.parking_status ?? (session ? "Parked" : (isSearched ? "Ready" : "---"))}</span></div>
                 </div>
               </div>
-
-              <div className="po-card">
-                <div className="po-section-head"><CreditCard size={20} color="#bec6e0" /><h3>Bill Summary</h3></div>
-                <div className="po-info-list" style={{ marginBottom: "16px" }}>
-                  <div className="po-info-row"><span className="po-info-label">Billing Days</span><span className="po-info-value po-info-muted">{session ? `${billingDays} day(s)` : "---"}</span></div>
-                  <div className="po-info-row"><span className="po-info-label">Daily Rate</span><span className="po-info-value po-info-muted">{session ? `₹${session.daily_amount ?? "0"}` : "---"}</span></div>
-                  <div className="po-info-row"><span className="po-info-label"><IndianRupee size={13} style={{ marginRight: 4 }} />Parking Amount</span><span className="po-info-value po-info-muted">{session ? `₹${grossFee.toFixed(2)}` : "---"}</span></div>
-                  <div className="po-info-row"><span className="po-info-label">Prepaid Amount</span><span className="pi-info-red">{session ? `-₹${session.prepaid ?? "0"}` : "---"}</span></div>
-                  <div className="po-info-row po-info-row-top-border"><span className="po-info-label">Remaining to Pay</span><span className="po-info-value po-info-muted">{session ? `₹${backendParkingFee.toFixed(2)}` : "---"}</span></div>
-                </div>
-                <div className="po-total-box"><p className="po-total-label">Final Amount To Collect</p><h2 className="po-total-amount">{session ? `₹${backendParkingFee.toFixed(2)}` : "₹0.00"}</h2></div>
-              </div>
-
-              <div className="po-actions-grid">
-                <button onClick={handleGenerateBill} disabled={!canGenBill} className="po-action-btn po-action-btn-full">
-                    {loadingBill ? <span className="po-spinner" /> : <Receipt size={18} color="#bec6e0" />} Generate Bill
-                </button>
-                <button onClick={handleSendMsg} disabled={!canMsg} className="po-action-btn">
-                    {loadingMsg ? <span className="po-spinner" /> : <MessageSquare size={18} color="#bec6e0" />} Send Message
-                </button>
-                <button onClick={handleSaveMsg} disabled={!canSave} className="po-action-btn">
-                    {loadingSave ? <span className="po-spinner" /> : <Save size={18} color="#bec6e0" />} Save Message Log
-                </button>
-              </div>
             </div>
 
-            {/* RIGHT COLUMN: Lookup and Scanner */}
             <div className="po-col-right">
               <div className="po-card">
                 <div className="po-card-title" style={{ color: "#bec6e0" }}><Search size={20} /><h3>Vehicle Lookup</h3></div>
@@ -391,12 +448,44 @@ export default function ParkOut() {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </main>
 
       {showInvoice && session && <InvoiceModal session={session} onClose={() => setShowInvoice(false)} />}
+      {showPaymentModal && session && (
+        <div className="po-modal-overlay" onClick={() => setShowPaymentModal(false)}>
+          <div className="po-modal po-modal-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="po-modal-header">
+              <h2 className="po-modal-title"><CreditCard size={20} /> Payment</h2>
+              <button className="po-modal-close" onClick={() => setShowPaymentModal(false)}><X size={20} /></button>
+            </div>
+            <div className="po-modal-body">
+              <div className="po-payment-summary">
+                <div className="po-info-row"><span className="po-info-label">Final Amount To Collect</span><span className="po-info-value po-info-green">₹{backendParkingFee.toFixed(2)}</span></div>
+                <div className="po-info-row"><span className="po-info-label">Vehicle No</span><span className="po-info-value po-info-bold">{session.vehicle_no}</span></div>
+              </div>
+              <label className="po-label" htmlFor="amount-paid">Amount Paid</label>
+              <input
+                id="amount-paid"
+                type="number"
+                min="0"
+                step="0.01"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                className="po-amount-input"
+                placeholder="0"
+              />
+            </div>
+            <div className="po-modal-footer">
+              <button className="po-action-btn" onClick={() => setShowPaymentModal(false)}>Cancel</button>
+              <button className="po-exit-btn po-exit-btn-sm" onClick={submitPayment} disabled={loadingBill}>
+                {loadingBill ? <span className="po-spinner po-spinner-dark" /> : <CheckCircle2 size={18} />} Confirm Payment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {error && <div className="po-toast po-toast-error">{error}</div>}
       {successMsg && <div className="po-toast po-toast-success">{successMsg}</div>}
     </div>

@@ -15,6 +15,10 @@ const ParkIn = () => {
 
   const [registeredVehicle, setRegisteredVehicle] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [searchDone, setSearchDone] = useState(false);
+  const [billGenerated, setBillGenerated] = useState(false);
+  const [messageSaved, setMessageSaved] = useState(false);
+  const [messageSent, setMessageSent] = useState(false);
 
   // API Base URL (adjust if your port is different)
   const API_BASE = "http://localhost:5000/park-in";
@@ -47,11 +51,12 @@ const ParkIn = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    // Use functional update to avoid stale-state overwrites
+    setSearchDone(false);
     setVehicleData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleToggle = () => {
+    setSearchDone(false);
     setVehicleData((prev) => ({
       ...prev,
       isPrepaid: !prev.isPrepaid,
@@ -78,9 +83,13 @@ const ParkIn = () => {
 
       if (!response.ok) {
         alert(data.message || "Vehicle details not found");
+        setBillGenerated(false);
+        setMessageSaved(false);
+        setMessageSent(false);
         return;
       }
       if (data.status === "success") {
+        setSearchDone(true);
         // FIX: use functional update so we merge onto the latest state
         // instead of a stale closure of vehicleData, which previously
         // risked overwriting prepaidAmount/isPrepaid the user had set.
@@ -91,6 +100,9 @@ const ParkIn = () => {
           phoneNumber: data.message.phone_number,
           parkingAmount: data.message.amount,
         }));
+        setBillGenerated(false);
+        setMessageSaved(false);
+        setMessageSent(false);
       } else {
         alert(data.message);
       }
@@ -139,6 +151,9 @@ const ParkIn = () => {
           parkInTime: new Date().toLocaleString(),
           status: currentParkingStatus,
         });
+        setBillGenerated(true);
+        setMessageSaved(false);
+        setMessageSent(false);
         alert(data.message || "Bill Generated Successfully!");
       } else {
         alert(data.message || "Failed to generate bill");
@@ -155,6 +170,9 @@ const ParkIn = () => {
     try {
       const response = await fetch(`${API_BASE}/send-msg`, { method: 'POST', credentials: "include" });
       const data = await response.json();
+      if (response.ok) {
+        setMessageSent(true);
+      }
       alert(data.message);
     } catch (error) {
       alert("Error sending message");
@@ -168,6 +186,9 @@ const ParkIn = () => {
     try {
       const response = await fetch(`${API_BASE}/save-msg`, { method: 'POST' , credentials: "include" });
       const data = await response.json();
+      if (response.ok) {
+        setMessageSaved(true);
+      }
       alert(data.message);
     } catch (error) {
       alert("Error saving message");
@@ -175,6 +196,11 @@ const ParkIn = () => {
       setLoading(false);
     }
   };
+
+  const canSearch = !loading && !!vehicleData.vehicleNumber;
+  const canGenerateBill = !loading && !billGenerated && !!vehicleData.vehicleNumber && parkingAmt > 0 && prepaidAmt >= 0 && prepaidAmt <= parkingAmt;
+  const canSaveMessage = billGenerated && !messageSaved && !loading;
+  const canSendMessage = billGenerated && !loading;
 
   return (
     <div className="pi-container">
@@ -249,7 +275,7 @@ const ParkIn = () => {
                   onChange={handleInputChange}
                   placeholder="Enter vehicle number"
                 />
-                <button className="pi-btn-search" onClick={handleSearchDetails} disabled={loading}>
+                <button className="pi-btn-search" onClick={handleSearchDetails} disabled={!canSearch}>
                   <span className="pi-icon">{loading ? 'sync' : 'search'}</span>
                   Search
                 </button>
@@ -337,6 +363,25 @@ const ParkIn = () => {
             )}
 
             {/* Live Bill Summary */}
+            <div className="pi-action-buttons">
+              <button
+                className="pi-btn-primary"
+                onClick={handleGenerateBill}
+                disabled={!canGenerateBill}
+              >
+                <span className="pi-icon">receipt</span>
+                {loading ? 'GENERATING...' : 'GENERATE BILL'}
+              </button>
+              <button className="pi-btn-secondary" onClick={handleSaveMessage} disabled={!canSaveMessage}>
+                <span className="pi-icon">save</span>
+                SAVE MESSAGE
+              </button>
+              <button className="pi-btn-secondary" onClick={handleSendMessage} disabled={!canSendMessage}>
+                <span className="pi-icon">send</span>
+                SEND MESSAGE
+              </button>
+            </div>
+
             <div className="pi-bill-summary-card">
               <div className="pi-bill-summary-header">
                 <span className="pi-bill-summary-title">
@@ -363,24 +408,6 @@ const ParkIn = () => {
               </div>
             </div>
 
-            <div className="pi-action-buttons">
-              <button
-                className="pi-btn-primary"
-                onClick={handleGenerateBill}
-                disabled={loading || !isFormValid}
-              >
-                <span className="pi-icon">receipt</span>
-                {loading ? 'GENERATING...' : 'GENERATE BILL'}
-              </button>
-              <button className="pi-btn-secondary" onClick={handleSaveMessage} disabled={loading}>
-                <span className="pi-icon">save</span>
-                SAVE MESSAGE
-              </button>
-              <button className="pi-btn-secondary" onClick={handleSendMessage} disabled={loading}>
-                <span className="pi-icon">send</span>
-                SEND MESSAGE
-              </button>
-            </div>
           </section>
 
           {/* ── Vehicle Details Card ── */}
