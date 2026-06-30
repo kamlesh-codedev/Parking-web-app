@@ -17,37 +17,36 @@ def park_in_generate(bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no):
     amount = int(amount)
     prepaid = int(prepaid)
     ph_no = str(ph_no).strip()
-    amount_due = int(amount_due) if amount_due is not None else max(0, amount - prepaid)
 
     if not check_stats(vehicle_no):
         response = {"status":"reserved",
                     "message":"Vehicle already parked in."}
         return response
     
-    if not park_in(bill_no,vehicle_no,vehicle_name,amount,prepaid,amount_due=amount_due):
-        response = {"status":"db_error",
+    if not park_in(bill_no,vehicle_no,vehicle_name,amount,prepaid):
+        response = {"status":"error",
                     "message":"Error in database fetching."}
         return response
     
     if get_vehicle_info(vehicle_no):
         if not update_vehicle_info(vehicle_no,vehicle_name,amount,ph_no):
-            response = {"status":"db_error",
+            response = {"status":"error",
                         "message":"Error in updating database."}
             return response
     else:
         if not create_vehicle_info(vehicle_no,vehicle_name,amount,ph_no):
-            response = {"status":"db_error",
+            response = {"status":"error",
                         "message":"Error in creating records."}
             return response
     
     pdf_path = park_in_pdf(bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no)
     if not pdf_path:
-        response = {"status":"pdf_error",
+        response = {"status":"error",
                     "message":"Error in creating PDF."}
         return response
     
     if not auto_print_pdf(pdf_path):
-        response = {"status":"printing_error",
+        response = {"status":"error",
                     "message":"Error in printing PDF."}
         return response
     
