@@ -59,34 +59,41 @@ def park_out_generate(vehicle_no):
     vehicle_no = str(vehicle_no).strip().upper()
 
     if check_stats(vehicle_no):
-        return {"status": "no_data", "message": "No Vehicle data found."}
-
-    record, ph = get_park_in(vehicle_no)
-
-    park_out_time  = datetime.now()
-    park_in_time   = record.park_in_date
-    daily_amount   = record.amount or 0
-    prepaid        = record.prepaid or 0
-    duration_days  = (park_out_time.date() - park_in_time.date()).days + 1
-    parking_fee    = duration_days * daily_amount
-    fee_to_pay     = parking_fee - prepaid
-
-    if not park_out(record, park_out_time, duration_days, fee_to_pay):
-        return {"status": "error", "message": "Error fetching the DataBase."}
-
-    return {
-        "status":         "success",
-        "message":        "Vehicle parked out successfully.",
-        "vehicle_no":     record.vehicle_no,
-        "vehicle_name":   record.vehicle_name,
-        "bill_no":        record.bill_no,
-        "park_in":        record.park_in_date,
-        "park_out":       park_out_time,
-        "no_of_days":     duration_days,
-        "daily_amount":   daily_amount,
-        "prepaid":        prepaid,
-        "parking_fee":    fee_to_pay,
-        "phone_number":   ph,
+        response = {"status":"no_data",
+                    "message":"No Vehicle data found."}
+        return response
+    
+    record,ph = get_park_in(vehicle_no)
+    
+    park_out_time = datetime.now()
+    park_in_time = record.park_in_date
+    daily_amount = record.amount or 0
+    prepaid = record.prepaid or 0
+    duration_days = (park_out_time.date() - park_in_time.date()).days + 1
+    parking_fee = duration_days * daily_amount
+    fee_to_pay = parking_fee - prepaid
+    if not park_out(record,park_out_time,duration_days,fee_to_pay):
+        response = {"status":"error",
+                    "message":"Error fetching the DataBase."}
+        return response
+    response = {
+        "status": "success",
+        "message": "Vehicle parked out successfully.",
+        "vehicle_no": record.vehicle_no,
+        "vehicle_name": record.vehicle_name,
+        "bill_no": record.bill_no,
+        "park_in": str(record.park_in_date.strftime('%d-%m-%Y %I:%M %p')),
+        "park_out": str(park_out_time.strftime('%d-%m-%Y %I:%M %p')),
+        "entry_time":str(record.park_in_date.strftime('%d-%m-%Y %I:%M %p')),
+        "exit_time": str(park_out_time.strftime('%d-%m-%Y %I:%M %p')),
+        "no_of_days": duration_days,
+        "daily_amount": daily_amount,
+        "prepaid": prepaid,
+        "parking_fee": fee_to_pay,
+        "phone_number":ph,
+        "phone": ph,
+        "total_amount": fee_to_pay,
+        "parking_status":"parked",
     }
 
 
