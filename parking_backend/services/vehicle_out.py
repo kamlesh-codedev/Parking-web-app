@@ -38,13 +38,18 @@ def park_out_generate(vehicle_no):
         "vehicle_no": record.vehicle_no,
         "vehicle_name": record.vehicle_name,
         "bill_no": record.bill_no,
-        "park_in": record.park_in_date,
-        "park_out": park_out_time,
+        "park_in": str(record.park_in_date.strftime('%d-%m-%Y %I:%M %p')),
+        "park_out": str(park_out_time.strftime('%d-%m-%Y %I:%M %p')),
+        "entry_time":str(record.park_in_date.strftime('%d-%m-%Y %I:%M %p')),
+        "exit_time": str(park_out_time.strftime('%d-%m-%Y %I:%M %p')),
         "no_of_days": duration_days,
         "daily_amount": daily_amount,
         "prepaid": prepaid,
         "parking_fee": fee_to_pay,
         "phone_number":ph,
+        "phone": ph,
+        "total_amount": fee_to_pay,
+        "parking_status":"parked",
     }
     return response
 

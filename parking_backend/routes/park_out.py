@@ -9,34 +9,39 @@ def get_vehicle_numbers():
     vehicle_list = get_currently_parked_vehicle_numbers()
     if not vehicle_list:
         return jsonify({"status":"error",
-                        "message":"No Parked In Vehicles found."}), 401
+                        "message":"No vehicles currently parked."}), 404
     return jsonify({"status":"success",
                     "vehicle_list":vehicle_list}), 200
 
 
 @park_out_bp.route('/generate-bill', methods=['POST'])
 def generate_bill():
-    data = request.get_json()
-    vehicle_no = data.get("vehicle_number")
-    session["vehicle_no"]=vehicle_no
+    data = request.get_json(silent=True) or {}
+    vehicle_no = (
+        data.get("vehicle_number")
+        or data.get("vehicle_no")
+        or ""
+    )
+    vehicle_no = str(vehicle_no).strip().upper()
     if not vehicle_no:
         return jsonify({"status":"error",
-                        "message":"Empty Vehicle Number"}), 401
+                        "message":"vehicle Number is required."}), 400
+    session["vehicle_no"]=vehicle_no
     response = park_out_generate(vehicle_no)
     if response.get("status")=="error":
         return jsonify(response), 500
     elif response.get("status")=="no_data":
-        return jsonify(response), 401
+        return jsonify(response), 404
     else:
         return jsonify(response), 200
 
 @park_out_bp.post('/payment')
 def process_payment():
     data = request.get_json()
-    vehicle_no = data.get("vehicle_no")
+    vehicle_no = str(data.get("vehicle_no","")).strip().upper()
     if vehicle_no != session.get("vehicle_no"):
         return jsonify({"status":"error",
-                        "message":"Unable to get Vehicle Number"})
+                        "message":"Unable to get Vehicle Number"}), 400
     amount_paid = data.get("amount_paid")
     response = payment_update(vehicle_no,amount_paid)
     if response.get("status")=="error":
@@ -45,14 +50,28 @@ def process_payment():
 
 @park_out_bp.post('/send-msg')
 def send_message():
-    response = park_out_msg(session.get("vehicle_no"))
+    vehicle_no = session.get("vehicle_no")
+    if not vehicle_no:
+        return jsonify({
+            "status": "error",
+            "message": "No active session. Please select a vehicle first."
+        }), 400
+
+    response = park_out_msg(vehicle_no)
     if response.get("status")=="error":
         return jsonify(response), 500
     return jsonify(response), 200
 
 @park_out_bp.post('/save-msg')
 def save_message():
-    response = park_out_msg(session.get("vehicle_no"),True)
+    vehicle_no = session.get("vehicle_no")
+    if not vehicle_no:
+        return jsonify({
+            "status": "error",
+            "message": "No active session. Please select a vehicle first."
+        }), 400
+
+    response = park_out_msg(vehicle_no,True)
     if response.get("status")=="error":
         return jsonify(response), 500
     return jsonify(response), 200
