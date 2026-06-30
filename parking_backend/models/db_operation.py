@@ -91,7 +91,7 @@ def check_stats(vehicle_no):
     db_session.commit()
     return True
 
-def park_in(bill_no, vehicle_no, vehicle_name,amount,prepaid, park_in_date=None):
+def park_in(bill_no, vehicle_no, vehicle_name, amount, prepaid, amount_due=None, park_in_date=None):
     record = ParkingRecord(
         park_in_date=park_in_date or datetime.now(),
         bill_no=bill_no,
@@ -99,7 +99,8 @@ def park_in(bill_no, vehicle_no, vehicle_name,amount,prepaid, park_in_date=None)
         vehicle_name=vehicle_name,
         amount=amount,
         prepaid=prepaid,
-        park_out = None,
+        amount_due=amount_due,
+        park_out=None,
     )
 
     db_session.add(record)

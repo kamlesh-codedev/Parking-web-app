@@ -9,22 +9,54 @@ const ParkIn = () => {
     vehicleName: '',
     phoneNumber: '',
     parkingAmount: '',
+    prepaidAmount: '0',
     isPrepaid: false,
   });
 
   const [registeredVehicle, setRegisteredVehicle] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // API Base URL (adjust if your port is different)
+  // API Base URL
   const API_BASE = "http://127.0.0.1:5000/park-in";
+
+  // Live Calculations
+  const parkingAmt = parseFloat(vehicleData.parkingAmount) || 0;
+  const prepaidAmt = vehicleData.isPrepaid ? (parseFloat(vehicleData.prepaidAmount) || 0) : 0;
+  const amountToPay = Math.max(0, parkingAmt - prepaidAmt);
+
+  const getPrepaidStatus = (pAmt, total) => {
+    if (pAmt <= 0) return "Not Prepaid";
+    if (pAmt > 0 && pAmt < total) return "Partially Prepaid";
+    if (pAmt >= total && total > 0) return "Fully Paid";
+    return "Not Prepaid";
+  };
+
+  const getParkingStatus = (remaining) => {
+    return (remaining === 0 && parkingAmt > 0) ? "Paid" : "Awaiting Payment";
+  };
+
+  const currentPrepaidStatus = getPrepaidStatus(prepaidAmt, parkingAmt);
+  const currentParkingStatus = getParkingStatus(amountToPay);
+
+  // Validation
+  const isFormValid =
+    vehicleData.vehicleNumber &&
+    parkingAmt > 0 &&
+    prepaidAmt >= 0 &&
+    prepaidAmt <= parkingAmt;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    // Use functional update to avoid stale-state overwrites
     setVehicleData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleToggle = () => {
-    setVehicleData((prev) => ({ ...prev, isPrepaid: !prev.isPrepaid }));
+    setVehicleData((prev) => ({
+      ...prev,
+      isPrepaid: !prev.isPrepaid,
+      prepaidAmount: !prev.isPrepaid ? prev.prepaidAmount : '0',
+    }));
   };
 
   // ── SEARCH: GET DETAILS ──
@@ -35,12 +67,10 @@ const ParkIn = () => {
     }
 
     setLoading(true);
-
     try {
       const response = await fetch(
         `${API_BASE}/get-details?vehicle_no=${encodeURIComponent(vehicleData.vehicleNumber)}`
       );
-
       const data = await response.json();
 
       if (!response.ok) {
@@ -49,13 +79,16 @@ const ParkIn = () => {
       }
 
       if (data.status === "success") {
-        setVehicleData({
+        // FIX: use functional update so we merge onto the latest state
+        // instead of a stale closure of vehicleData, which previously
+        // risked overwriting prepaidAmount/isPrepaid the user had set.
+        setVehicleData((prev) => ({
+          ...prev,
           vehicleNumber: data.message.vehicle_number,
           vehicleName: data.message.vehicle_name,
           phoneNumber: data.message.phone_number,
           parkingAmount: data.message.amount,
-          isPrepaid: false,
-        });
+        }));
       } else {
         alert(data.message);
       }
@@ -69,8 +102,8 @@ const ParkIn = () => {
 
   // ── GENERATE BILL ──
   const handleGenerateBill = async () => {
-    if (!vehicleData.vehicleNumber) return alert("Please enter a vehicle number.");
-    
+    if (!isFormValid) return alert("Please fill all details correctly. Prepaid amount cannot exceed total amount.");
+
     setLoading(true);
     try {
       const response = await fetch(`${API_BASE}/generate-bill`, {
@@ -79,8 +112,12 @@ const ParkIn = () => {
         body: JSON.stringify({
           vehicle_no: vehicleData.vehicleNumber,
           vehicle_name: vehicleData.vehicleName,
-          amount: vehicleData.parkingAmount,
+          amount: parkingAmt,
           prepaid: vehicleData.isPrepaid,
+          prepaid_amount: prepaidAmt,
+          amount_to_pay: amountToPay,
+          prepaid_status: currentPrepaidStatus,
+          parking_status: currentParkingStatus,
           phone_number: vehicleData.phoneNumber
         })
       });
@@ -93,10 +130,12 @@ const ParkIn = () => {
           vehicleName: data.vehicle_name || vehicleData.vehicleName,
           billNumber: data.bill_no,
           phoneNumber: data.ph_no || vehicleData.phoneNumber,
-          parkingAmount: data.amount || vehicleData.parkingAmount,
-          isPrepaid: vehicleData.isPrepaid,
+          parkingAmount: parkingAmt,
+          prepaidAmount: prepaidAmt,
+          amountToPay: amountToPay,
+          prepaidStatus: currentPrepaidStatus,
           parkInTime: new Date().toLocaleString(),
-          status: data.status === "reserved" ? "Reserved" : "Parked",
+          status: currentParkingStatus,
         });
         alert("Bill Generated Successfully!");
       } else {
@@ -109,7 +148,6 @@ const ParkIn = () => {
     }
   };
 
-  // ── SEND MESSAGE ──
   const handleSendMessage = async () => {
     setLoading(true);
     try {
@@ -123,7 +161,6 @@ const ParkIn = () => {
     }
   };
 
-  // ── SAVE MESSAGE ──
   const handleSaveMessage = async () => {
     setLoading(true);
     try {
@@ -199,7 +236,6 @@ const ParkIn = () => {
               <h2 className="pi-card-title">Vehicle Registration</h2>
             </div>
 
-            {/* Vehicle Number */}
             <div className="pi-form-group">
               <label className="pi-label">VEHICLE NUMBER</label>
               <div className="pi-search-row">
@@ -211,18 +247,13 @@ const ParkIn = () => {
                   onChange={handleInputChange}
                   placeholder="Enter vehicle number"
                 />
-                <button 
-                  className="pi-btn-search" 
-                  onClick={handleSearchDetails}
-                  disabled={loading}
-                >
+                <button className="pi-btn-search" onClick={handleSearchDetails} disabled={loading}>
                   <span className="pi-icon">{loading ? 'sync' : 'search'}</span>
                   Search
                 </button>
               </div>
             </div>
 
-            {/* Name + Phone */}
             <div className="pi-form-row">
               <div className="pi-form-group">
                 <label className="pi-label">VEHICLE NAME</label>
@@ -248,10 +279,9 @@ const ParkIn = () => {
               </div>
             </div>
 
-            {/* Amount + Toggle */}
             <div className="pi-form-row">
               <div className="pi-form-group">
-                <label className="pi-label">PARKING AMOUNT (₹)</label>
+                <label className="pi-label">TOTAL PARKING AMOUNT (₹)</label>
                 <div className="pi-input-wrap">
                   <span className="pi-currency-symbol">₹</span>
                   <input
@@ -280,9 +310,61 @@ const ParkIn = () => {
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {vehicleData.isPrepaid && (
+              <div className="pi-form-group pi-fade-in">
+                <label className="pi-label">PREPAID AMOUNT (₹)</label>
+                <div className="pi-input-wrap">
+                  <span className="pi-currency-symbol">₹</span>
+                  <input
+                    className={`pi-input pi-input-currency ${prepaidAmt > parkingAmt ? 'pi-input--error' : ''}`}
+                    type="number"
+                    name="prepaidAmount"
+                    value={vehicleData.prepaidAmount}
+                    onChange={handleInputChange}
+                    placeholder="Enter amount paid"
+                  />
+                </div>
+                {prepaidAmt > parkingAmt && (
+                   <span className="pi-validation-msg pi-validation-msg--error">
+                     <span className="pi-icon">error</span> Prepaid cannot exceed Total.
+                   </span>
+                )}
+              </div>
+            )}
+
+            {/* Live Bill Summary */}
+            <div className="pi-bill-summary-card">
+              <div className="pi-bill-summary-header">
+                <span className="pi-bill-summary-title">
+                  <span className="pi-icon">payments</span> LIVE BILL SUMMARY
+                </span>
+              </div>
+              <div className="pi-bill-summary-grid">
+                <div className="pi-bill-summary-row">
+                  <span className="pi-bill-summary-label">TOTAL AMOUNT</span>
+                  <span className="pi-bill-summary-value">₹ {parkingAmt}</span>
+                </div>
+                <div className="pi-bill-summary-row">
+                  <span className="pi-bill-summary-label">PREPAID</span>
+                  <span className="pi-bill-summary-value">₹ {prepaidAmt}</span>
+                </div>
+                <div className="pi-bill-summary-row">
+                  <span className="pi-bill-summary-label">BALANCE TO PAY</span>
+                  <span className="pi-bill-summary-value pi-bill-summary-value--large">₹ {amountToPay}</span>
+                </div>
+                <div className="pi-bill-summary-row">
+                  <span className="pi-bill-summary-label">PREPAID STATUS</span>
+                  <span className="pi-bill-summary-value pi-bill-summary-value--accent">{currentPrepaidStatus}</span>
+                </div>
+              </div>
+            </div>
+
             <div className="pi-action-buttons">
-              <button className="pi-btn-primary" onClick={handleGenerateBill} disabled={loading}>
+              <button
+                className="pi-btn-primary"
+                onClick={handleGenerateBill}
+                disabled={loading || !isFormValid}
+              >
                 <span className="pi-icon">receipt</span>
                 {loading ? 'GENERATING...' : 'GENERATE BILL'}
               </button>
@@ -327,18 +409,29 @@ const ParkIn = () => {
                 </div>
               </li>
               <li className="pi-detail-item">
-                <span className="pi-detail-icon-wrap"><span className="pi-icon pi-detail-icon">call</span></span>
+                <span className="pi-detail-icon-wrap"><span className="pi-icon pi-detail-icon">payments</span></span>
                 <div className="pi-detail-body">
-                  <span className="pi-detail-label">PHONE NUMBER</span>
-                  <span className="pi-detail-value">{registeredVehicle?.phoneNumber || '—'}</span>
+                  <span className="pi-detail-label">TOTAL AMOUNT</span>
+                  <span className="pi-detail-value">
+                    {registeredVehicle?.parkingAmount ? `₹ ${registeredVehicle.parkingAmount}` : '—'}
+                  </span>
                 </div>
               </li>
               <li className="pi-detail-item">
-                <span className="pi-detail-icon-wrap"><span className="pi-icon pi-detail-icon">payments</span></span>
+                <span className="pi-detail-icon-wrap"><span className="pi-icon pi-detail-icon">account_balance_wallet</span></span>
                 <div className="pi-detail-body">
-                  <span className="pi-detail-label">PARKING AMOUNT</span>
+                  <span className="pi-detail-label">PREPAID AMOUNT</span>
                   <span className="pi-detail-value">
-                    {registeredVehicle?.parkingAmount ? `₹ ${registeredVehicle.parkingAmount}` : '—'}
+                    {registeredVehicle ? `₹ ${registeredVehicle.prepaidAmount}` : '—'}
+                  </span>
+                </div>
+              </li>
+              <li className="pi-detail-item">
+                <span className="pi-detail-icon-wrap"><span className="pi-icon pi-detail-icon">price_check</span></span>
+                <div className="pi-detail-body">
+                  <span className="pi-detail-label">AMOUNT TO PAY</span>
+                  <span className="pi-detail-value pi-value-accent">
+                    {registeredVehicle ? `₹ ${registeredVehicle.amountToPay}` : '—'}
                   </span>
                 </div>
               </li>
@@ -347,7 +440,7 @@ const ParkIn = () => {
                 <div className="pi-detail-body">
                   <span className="pi-detail-label">PREPAID STATUS</span>
                   <span className="pi-detail-value">
-                    {registeredVehicle ? (registeredVehicle.isPrepaid ? 'Yes' : 'No') : '—'}
+                    {registeredVehicle?.prepaidStatus || '—'}
                   </span>
                 </div>
               </li>
@@ -355,14 +448,14 @@ const ParkIn = () => {
                 <span className="pi-detail-icon-wrap"><span className="pi-icon pi-detail-icon">schedule</span></span>
                 <div className="pi-detail-body">
                   <span className="pi-detail-label">PARK-IN TIME</span>
-                  <span className="pi-detail-value pi-value-accent">{registeredVehicle?.parkInTime || '—'}</span>
+                  <span className="pi-detail-value">{registeredVehicle?.parkInTime || '—'}</span>
                 </div>
               </li>
               <li className="pi-detail-item pi-detail-item-last">
                 <span className="pi-detail-icon-wrap"><span className="pi-icon pi-detail-icon">hdr_strong</span></span>
                 <div className="pi-detail-body">
                   <span className="pi-detail-label">PARKING STATUS</span>
-                  <span className={`pi-status-badge ${registeredVehicle ? 'pi-status-parked' : 'pi-status-waiting'}`}>
+                  <span className={`pi-status-badge ${registeredVehicle?.status === 'Paid' ? 'pi-status-checked-out' : registeredVehicle ? 'pi-status-reserved' : 'pi-status-waiting'}`}>
                     {registeredVehicle?.status || 'Awaiting Check-In'}
                   </span>
                 </div>

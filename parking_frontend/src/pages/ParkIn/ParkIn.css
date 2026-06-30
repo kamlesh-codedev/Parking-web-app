@@ -22,6 +22,14 @@
   --pi-input-bg:      rgba(255, 255, 255, 0.06);
   --pi-input-border:  rgba(255, 255, 255, 0.14);
   --pi-red:           #ef4444;
+  --pi-red-dim:       rgba(239, 68, 68, 0.12);
+  --pi-red-border:    rgba(239, 68, 68, 0.4);
+  --pi-green:         #22c55e;
+  --pi-green-dim:     rgba(34, 197, 94, 0.12);
+  --pi-green-border:  rgba(34, 197, 94, 0.4);
+  --pi-yellow:        #f59e0b;
+  --pi-yellow-dim:    rgba(245, 158, 11, 0.12);
+  --pi-yellow-border: rgba(245, 158, 11, 0.4);
   --pi-sidebar-w:     220px;
   --pi-radius:        10px;
   --pi-radius-sm:     6px;
@@ -60,7 +68,7 @@ body {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  overflow:hidden;
+  overflow: hidden;
 }
 
 /* ── Sidebar ── */
@@ -80,7 +88,7 @@ body {
   height: 100vh;
   z-index: 200;
   overflow-y: auto;
-  overflow-x:hidden;
+  overflow-x: hidden;
 }
 
 .pi-sidebar-logo {
@@ -187,7 +195,7 @@ body {
   min-width: 0;
   width: calc(100% - var(--pi-sidebar-w));
   height: 100vh;
-  overflow-y:auto;
+  overflow-y: auto;
 }
 
 /* ── Page header ── */
@@ -266,6 +274,195 @@ body {
 }
 
 /* ============================================================
+   BILL SUMMARY CARD
+   ============================================================ */
+.pi-bill-summary-card {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 212, 255, 0.08) 0%,
+    rgba(13, 32, 61, 0.9) 60%
+  );
+  border: 1px solid rgba(0, 212, 255, 0.28);
+  border-radius: var(--pi-radius);
+  padding: 1.5rem 1.75rem;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 0 0 1px rgba(0, 212, 255, 0.08) inset,
+    0 4px 32px rgba(0, 0, 0, 0.35),
+    0 0 60px rgba(0, 212, 255, 0.06);
+  margin-top: 1.5rem;
+  animation: pi-fade-in 0.35s ease;
+}
+
+.pi-bill-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.14);
+}
+
+.pi-bill-summary-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--pi-cyan);
+}
+
+.pi-bill-number {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--pi-muted);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--pi-border);
+  border-radius: 4px;
+  padding: 0.2rem 0.55rem;
+  letter-spacing: 0.5px;
+}
+
+.pi-bill-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem 1.5rem;
+  margin-bottom: 1.1rem;
+}
+
+.pi-bill-summary-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pi-bill-summary-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--pi-muted);
+}
+
+.pi-bill-summary-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--pi-white);
+}
+
+.pi-bill-summary-value--accent {
+  color: var(--pi-cyan);
+}
+
+.pi-bill-summary-value--large {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--pi-cyan);
+  letter-spacing: -0.3px;
+}
+
+.pi-bill-summary-divider {
+  height: 1px;
+  background: rgba(0, 212, 255, 0.1);
+  margin: 0.85rem 0;
+}
+
+.pi-bill-summary-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pi-bill-summary-time {
+  font-size: 0.75rem;
+  color: var(--pi-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pi-bill-summary-time .pi-icon {
+  font-size: 0.9rem;
+}
+
+/* ============================================================
+   PREPAID FEATURE STYLES
+   ============================================================ */
+
+/* Prepaid indicator banner — shown when isPrepaid is true */
+.pi-prepaid-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--pi-cyan-dim);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: var(--pi-radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--pi-cyan);
+  margin-top: 0.5rem;
+  letter-spacing: 0.3px;
+  animation: pi-fade-in 0.25s ease;
+}
+
+.pi-prepaid-banner .pi-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* Prepaid badge used in detail list / bill summary */
+.pi-prepaid-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.65rem;
+  background: var(--pi-cyan-dim);
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--pi-cyan);
+  text-transform: uppercase;
+}
+
+.pi-prepaid-badge--no {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--pi-muted);
+}
+
+/* Fade-in utility used on the conditionally-rendered prepaid amount field */
+.pi-fade-in {
+  animation: pi-fade-in 0.3s ease-out forwards;
+}
+
+/* Highlighted amount when prepaid */
+.pi-amount-prepaid {
+  position: relative;
+}
+
+.pi-amount-prepaid::after {
+  content: 'PREPAID';
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--pi-cyan);
+  background: var(--pi-cyan-dim);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 3px;
+  padding: 0.1rem 0.35rem;
+}
+
+/* ============================================================
    FORM ELEMENTS
    ============================================================ */
 .pi-form-group {
@@ -311,6 +508,33 @@ body {
   border-color: var(--pi-cyan);
   background: rgba(0, 212, 255, 0.06);
   box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.12);
+}
+
+/* ── Input error state ── */
+.pi-input--error {
+  border-color: var(--pi-red) !important;
+  background: var(--pi-red-dim) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+}
+
+.pi-input--error:focus {
+  border-color: var(--pi-red) !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18) !important;
+}
+
+/* ── Input success state ── */
+.pi-input--success {
+  border-color: var(--pi-green) !important;
+  background: rgba(34, 197, 94, 0.05) !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1) !important;
+}
+
+/* ── Input warning state ── */
+.pi-input--warning {
+  border-color: var(--pi-yellow) !important;
+  background: var(--pi-yellow-dim) !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1) !important;
 }
 
 /* Icon-padded input */
@@ -384,21 +608,11 @@ body {
   box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
 }
 
-@media (max-width: 480px) {
-  .pi-search-row {
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-
-  .pi-search-input {
-    flex: none;
-    width: 100%;
-  }
-
-  .pi-btn-search {
-    width: 100%;
-  }
+.pi-btn-search:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
+
 /* ── Toggle switch ── */
 .pi-toggle-row {
   display: flex;
@@ -433,6 +647,7 @@ body {
 
 .pi-toggle-on {
   background: var(--pi-cyan);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
 }
 
 .pi-toggle-thumb {
@@ -454,12 +669,13 @@ body {
 /* ── Action buttons ── */
 .pi-action-buttons {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   margin-top: 1.75rem;
 }
 
 .pi-btn-primary {
-  flex: 1;
+  flex: 1 1 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -475,7 +691,7 @@ body {
   letter-spacing: 0.5px;
   cursor: pointer;
   box-shadow: 0 0 24px rgba(0, 212, 255, 0.35);
-  transition: opacity 0.2s, box-shadow 0.2s;
+  transition: opacity 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 
 .pi-btn-primary:hover {
@@ -483,8 +699,18 @@ body {
   box-shadow: 0 0 32px rgba(0, 212, 255, 0.5);
 }
 
+.pi-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.pi-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .pi-btn-secondary {
-  flex: 1;
+  flex: 1 1 calc(50% - 0.75rem);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -505,6 +731,143 @@ body {
 .pi-btn-secondary:hover {
   background: var(--pi-cyan-dim);
   box-shadow: 0 0 16px rgba(0, 212, 255, 0.15);
+}
+
+.pi-btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Danger / reset button ── */
+.pi-btn-danger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  background: var(--pi-red-dim);
+  border: 1px solid var(--pi-red-border);
+  border-radius: var(--pi-radius-sm);
+  color: var(--pi-red);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.pi-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+}
+
+/* ============================================================
+   VALIDATION MESSAGES
+   ============================================================ */
+
+/* Base validation message */
+.pi-validation-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-top: 0.35rem;
+  animation: pi-fade-in 0.2s ease;
+}
+
+.pi-validation-msg .pi-icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+}
+
+/* Error message */
+.pi-validation-msg--error {
+  color: #f87171;
+}
+
+.pi-validation-msg--error .pi-icon {
+  color: var(--pi-red);
+}
+
+/* Success message */
+.pi-validation-msg--success {
+  color: #4ade80;
+}
+
+.pi-validation-msg--success .pi-icon {
+  color: var(--pi-green);
+}
+
+/* Warning message */
+.pi-validation-msg--warning {
+  color: #fcd34d;
+}
+
+.pi-validation-msg--warning .pi-icon {
+  color: var(--pi-yellow);
+}
+
+/* Info message */
+.pi-validation-msg--info {
+  color: var(--pi-muted);
+}
+
+.pi-validation-msg--info .pi-icon {
+  color: var(--pi-cyan);
+}
+
+/* ── Form group with error state ── */
+.pi-form-group--error .pi-label {
+  color: #f87171;
+}
+
+.pi-form-group--success .pi-label {
+  color: #4ade80;
+}
+
+/* ── Global inline alert banners ── */
+.pi-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--pi-radius-sm);
+  font-size: 0.82rem;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+  animation: pi-fade-in 0.25s ease;
+}
+
+.pi-alert .pi-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.pi-alert--error {
+  background: var(--pi-red-dim);
+  border: 1px solid var(--pi-red-border);
+  color: #fca5a5;
+}
+
+.pi-alert--success {
+  background: var(--pi-green-dim);
+  border: 1px solid var(--pi-green-border);
+  color: #86efac;
+}
+
+.pi-alert--warning {
+  background: var(--pi-yellow-dim);
+  border: 1px solid var(--pi-yellow-border);
+  color: #fde68a;
+}
+
+.pi-alert--info {
+  background: var(--pi-cyan-dim);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: var(--pi-cyan);
 }
 
 /* ============================================================
@@ -550,6 +913,7 @@ body {
   flex-direction: column;
   gap: 0.18rem;
   flex: 1;
+  min-width: 0;
 }
 
 .pi-detail-label {
@@ -564,6 +928,9 @@ body {
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--pi-white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pi-value-muted {
@@ -578,10 +945,13 @@ body {
   font-size: 0.9rem;
 }
 
-/* Status badge */
+/* ============================================================
+   STATUS BADGES
+   ============================================================ */
 .pi-status-badge {
   display: inline-flex;
   align-items: center;
+  gap: 0.3rem;
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
   font-size: 0.75rem;
@@ -589,16 +959,125 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* Parked */
 .pi-status-parked {
   background: rgba(0, 212, 255, 0.15);
   color: var(--pi-cyan);
   border: 1px solid rgba(0, 212, 255, 0.4);
 }
 
+/* Waiting / awaiting check-in */
 .pi-status-waiting {
   background: rgba(255, 255, 255, 0.07);
   color: var(--pi-muted);
   border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Reserved */
+.pi-status-reserved {
+  background: var(--pi-yellow-dim);
+  color: var(--pi-yellow);
+  border: 1px solid var(--pi-yellow-border);
+}
+
+/* Checked out */
+.pi-status-checked-out {
+  background: var(--pi-green-dim);
+  color: var(--pi-green);
+  border: 1px solid var(--pi-green-border);
+}
+
+/* Error / overstay */
+.pi-status-error {
+  background: var(--pi-red-dim);
+  color: var(--pi-red);
+  border: 1px solid var(--pi-red-border);
+}
+
+/* Active / live pulse variant */
+.pi-status-parked--pulse::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pi-cyan);
+  margin-right: 0.3rem;
+  animation: pi-pulse 1.8s ease-in-out infinite;
+}
+
+/* ============================================================
+   LOADING / SPINNER
+   ============================================================ */
+.pi-spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--pi-muted);
+  font-size: 0.82rem;
+}
+
+.pi-spinner .pi-icon {
+  animation: pi-spin 0.9s linear infinite;
+  color: var(--pi-cyan);
+}
+
+/* Skeleton shimmer for loading state */
+.pi-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.10) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: pi-shimmer 1.4s ease-in-out infinite;
+}
+
+.pi-skeleton--text {
+  height: 0.85rem;
+  width: 70%;
+}
+
+.pi-skeleton--label {
+  height: 0.65rem;
+  width: 45%;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes pi-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pi-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pi-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.75);
+  }
+}
+
+@keyframes pi-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 /* ============================================================
@@ -612,6 +1091,10 @@ body {
   .pi-registration-card,
   .pi-details-card {
     min-height: auto;
+  }
+
+  .pi-bill-summary-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -662,68 +1145,38 @@ body {
   .pi-form-row {
     grid-template-columns: 1fr;
   }
-}
 
-/* ... Keep existing CSS ... */
-
-/* Updated Action buttons to support 3 buttons */
-.pi-action-buttons {
-  display: flex;
-  flex-wrap: wrap; /* Allows wrapping on smaller screens */
-  gap: 0.75rem;
-  margin-top: 1.75rem;
-}
-
-.pi-btn-primary {
-  flex: 1 1 100%; /* Makes Generate Bill button take full width on top */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.85rem 1rem;
-  background: var(--pi-cyan);
-  border: none;
-  border-radius: var(--pi-radius-sm);
-  color: #001a26;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  box-shadow: 0 0 24px rgba(0, 212, 255, 0.35);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.pi-btn-primary:active {
-  transform: scale(0.98);
-}
-
-.pi-btn-secondary {
-  flex: 1 1 calc(50% - 0.75rem); /* Splits the remaining width between Save and Send */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.85rem 1rem;
-  background: transparent;
-  border: 1px solid var(--pi-cyan);
-  border-radius: var(--pi-radius-sm);
-  color: var(--pi-cyan);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s;
-}
-
-.pi-btn-secondary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  .pi-bill-summary-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 480px) {
+  .pi-search-row {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .pi-search-input {
+    flex: none;
+    width: 100%;
+  }
+
+  .pi-btn-search {
+    width: 100%;
+  }
+
   .pi-btn-secondary {
-    flex: 1 1 100%; /* Stack all buttons on very small screens */
+    flex: 1 1 100%;
+  }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

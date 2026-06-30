@@ -32,22 +32,23 @@ def get_vehicle_details():
 @park_in_bp.route('/generate-bill', methods=['POST'])
 def generate_bill():
     if "vehicle_no" not in session or "bill_no" not in session:
-        return jsonify({"status":"error",
-                        "message":"Unauthorized Logic please login again"}), 401
+        return jsonify({"status": "error",
+                        "message": "Unauthorized Logic please login again"}), 401
     data = request.get_json()
-    if session.get("vehicle_no")!=data.get("vehicle_no"):
-        return jsonify({"status":"error",
-                        "message":"Unable to get Vehicle Number"})
+    if session.get("vehicle_no") != data.get("vehicle_no"):
+        return jsonify({"status": "error",
+                        "message": "Unable to get Vehicle Number"})
     vehicle_no = session.get("vehicle_no")
     bill_no = session["bill_no"]
     vehicle_name = data.get("vehicle_name")
     amount = data.get("amount")
-    prepaid = data.get("prepaid")
+    prepaid = data.get("prepaid_amount", data.get("prepaid"))
+    amount_due = data.get("amount_to_pay")
     ph_no = data.get("phone_number")
-    response = park_in_generate(bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no)
-    if response.get("status")=="error":
+    response = park_in_generate(bill_no, vehicle_no, vehicle_name, amount, prepaid, ph_no, amount_due=amount_due)
+    if response.get("status") == "error":
         return jsonify(response), 500
-    elif response.get("status")=="reserved":
+    elif response.get("status") == "reserved":
         return jsonify(response), 429
     else:
         return jsonify(response), 200

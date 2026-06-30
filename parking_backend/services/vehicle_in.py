@@ -10,20 +10,21 @@ from services.print_bill import auto_print_pdf
 import pyautogui
 import time
 
-def park_in_generate(bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no):
+def park_in_generate (bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no,amount_due=None):
     bill_no = int(bill_no)
     vehicle_no = str(vehicle_no).strip().upper()
     vehicle_name = str(vehicle_name).strip().upper()
     amount = int(amount)
     prepaid = int(prepaid)
     ph_no = str(ph_no).strip()
+    amount_due = int(amount_due) if amount_due is not None else max(0, amount - prepaid)
 
     if not check_stats(vehicle_no):
         response = {"status":"reserved",
                     "message":"Vehicle already parked in."}
         return response
     
-    if not park_in(bill_no,vehicle_no,vehicle_name,amount,prepaid):
+    if not park_in(bill_no,vehicle_no,vehicle_name,amount,prepaid,amount_due=amount_due):
         response = {"status":"db_error",
                     "message":"Error in database fetching."}
         return response
