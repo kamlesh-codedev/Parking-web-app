@@ -63,7 +63,11 @@ def park_out_generate(vehicle_no):
                     "message":"No Vehicle data found."}
         return response
     
-    record,ph = get_park_in(vehicle_no)
+    record,ph =  get_park_in(vehicle_no)
+    if not record:
+        response = {"status":"error",
+                    "message":"No Data Found in DB"}
+        return response
     
     park_out_time = datetime.now()
     park_in_time = record.park_in_date
@@ -95,6 +99,7 @@ def park_out_generate(vehicle_no):
         "total_amount": fee_to_pay,
         "parking_status":"parked",
     }
+    return response
 
 
 def payment_update(vehicle_no, amount_paid):

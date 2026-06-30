@@ -121,7 +121,7 @@ def get_park_in(vehicle_no):
     )
 
     if not record:
-        return False
+        return 0,0
 
     vehicle = (
         db_session.query(Vehicle)
