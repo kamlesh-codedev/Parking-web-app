@@ -979,3 +979,81 @@ body {
   .po-modal { max-width: 100%; }
   .po-modal-sm { max-width: 100%; }
 }
+
+/* ... Previous root and base styles remain exactly the same ... */
+
+/* ── Two-column grid update ── */
+.po-grid {
+  display: grid;
+  /* Left column (main info) is wider, Right column (lookup) is fixed */
+  grid-template-columns: 1fr 400px; 
+  gap: var(--sp-lg);
+  align-items: start;
+}
+
+/* Ensure the action buttons grid looks clean in the left column */
+.po-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-md);
+}
+
+.po-action-btn {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-xl);
+  padding: var(--sp-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--c-on-surface);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.po-action-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--c-secondary);
+}
+
+.po-action-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.po-action-btn-full {
+  grid-column: 1 / -1;
+  background: rgba(78, 222, 163, 0.1);
+  border: 1px solid rgba(78, 222, 163, 0.3);
+  color: var(--c-secondary);
+  font-weight: 600;
+  padding: var(--sp-lg);
+  font-size: 16px;
+}
+
+.po-action-btn-full:hover:not(:disabled) {
+  background: rgba(78, 222, 163, 0.2);
+}
+
+/* Adjust lookup button to look proper in narrower right column */
+.po-lookup-row {
+  flex-direction: column;
+  gap: var(--sp-sm);
+}
+
+.po-search-btn {
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1100px) {
+  .po-grid { grid-template-columns: 1fr; }
+  .po-col-right { order: -1; } /* On mobile, put lookup at the top */
+}
+
+/* ... All other modal, toast, and scanner styles remain exactly as they were ... */
