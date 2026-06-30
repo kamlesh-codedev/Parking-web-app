@@ -50,9 +50,6 @@ const ParkIn = () => {
         alert(data.message || "Vehicle details not found");
         return;
       }
-      setVehicleData({
-        bill_no: data.message.bill_no
-      })
       if (data.status === "success") {
         setVehicleData({
           vehicleNumber: data.message.vehicle_number,
@@ -97,14 +94,14 @@ const ParkIn = () => {
         setRegisteredVehicle({
           vehicleNumber: data.vehicle_no || vehicleData.vehicleNumber,
           vehicleName: data.vehicle_name || vehicleData.vehicleName,
-          billNumber: data.bill_no || vehicleData.bill_no,
+          billNumber: data.bill_no,
           phoneNumber: data.ph_no || vehicleData.phoneNumber,
           parkingAmount: data.amount || vehicleData.parkingAmount,
           isPrepaid: vehicleData.isPrepaid,
           parkInTime: new Date().toLocaleString(),
           status: data.status === "reserved" ? "Reserved" : "Parked",
         });
-        alert("Bill Generated Successfully!");
+        alert(data.message || "Bill Generated Successfully!");
       } else {
         alert(data.message || "Failed to generate bill");
       }

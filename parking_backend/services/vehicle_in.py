@@ -58,7 +58,8 @@ def park_in_generate(bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no):
     pyautogui.press('enter')
     
     response={"status":"success",
-              "message":"Parking saved and printed successfully!"}
+              "message":"Parking saved and printed successfully!",
+              "bill_no":bill_no}
     return response
     
 def park_in_pdf(bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no):
