@@ -9,7 +9,7 @@ const ParkIn = () => {
     vehicleName: '',
     phoneNumber: '',
     parkingAmount: '',
-    prepaidAmount: '0',
+    prepaidAmount: '',
     isPrepaid: false,
   });
 
@@ -292,6 +292,7 @@ const ParkIn = () => {
                     name="parkingAmount"
                     value={vehicleData.parkingAmount}
                     onChange={handleInputChange}
+                    onWheel={(e) => e.target.blur()} 
                     placeholder="0"
                   />
                 </div>
@@ -323,6 +324,7 @@ const ParkIn = () => {
                     name="prepaidAmount"
                     value={vehicleData.prepaidAmount}
                     onChange={handleInputChange}
+                    onWheel={(e) => e.target.blur()}
                     placeholder="Enter amount paid"
                   />
                 </div>

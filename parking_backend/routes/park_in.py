@@ -11,7 +11,7 @@ def get_vehicle_details():
     session["vehicle_no"] = vehicle_no
     if not vehicle_no:
         return jsonify({"status":"errror",
-                        "message":"Empty Vehicle Number"}), 401
+                    "message":"Empty Vehicle Number"}), 401
     vehicle_no = vehicle_no.strip()
     details = get_vehicle_info(vehicle_no)
     if not details:
