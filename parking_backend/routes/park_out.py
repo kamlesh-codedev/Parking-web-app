@@ -39,7 +39,7 @@ def generate_bill():
 def process_payment():
     data = request.get_json()
     vehicle_no = str(data.get("vehicle_no","")).strip().upper()
-    if vehicle_no != session.get("vehicle_no"):
+    if vehicle_no != session.get("vehicle_no",""):
         return jsonify({"status":"error",
                         "message":"Unable to get Vehicle Number"}), 400
     amount_paid = data.get("amount_paid")
