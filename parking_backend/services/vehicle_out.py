@@ -11,51 +11,7 @@ from services.pdf_handling import delete_invoice
 import pyautogui
 import time
 
-
-# ── NEW: read-only preview — does NOT write to the database ──────────────────
-def park_out_preview(vehicle_no):
-    """
-    Returns bill details for display purposes only.
-    Does not call park_out() so the database is not modified.
-    Used by the /generate-bill (Search) button.
-    """
-    vehicle_no = str(vehicle_no).strip().upper()
-
-    if check_stats(vehicle_no):
-        return {"status": "no_data", "message": "No Vehicle data found."}
-
-    record, ph = get_park_in(vehicle_no)
-
-    park_out_time  = datetime.now()
-    park_in_time   = record.park_in_date
-    daily_amount   = record.amount or 0
-    prepaid        = record.prepaid or 0
-    duration_days  = (park_out_time.date() - park_in_time.date()).days + 1
-    parking_fee    = duration_days * daily_amount
-    fee_to_pay     = parking_fee - prepaid
-
-    return {
-        "status":         "success",
-        "message":        "Preview generated.",
-        "vehicle_no":     record.vehicle_no,
-        "vehicle_name":   record.vehicle_name,
-        "bill_no":        record.bill_no,
-        "park_in":        record.park_in_date,
-        "park_out":       park_out_time,          # current time, not written to DB
-        "no_of_days":     duration_days,
-        "daily_amount":   daily_amount,
-        "prepaid":        prepaid,
-        "parking_fee":    fee_to_pay,             # remaining to pay
-        "phone_number":   ph,
-    }
-
-
-# ── EXISTING: commits park-out to DB — called only on Complete Payment ───────
 def park_out_generate(vehicle_no):
-    """
-    Calculates the bill AND writes park_out_time + fee to the database.
-    Only call this when the operator confirms payment.
-    """
     vehicle_no = str(vehicle_no).strip().upper()
 
     if check_stats(vehicle_no):
@@ -63,11 +19,7 @@ def park_out_generate(vehicle_no):
                     "message":"No Vehicle data found."}
         return response
     
-    record,ph =  get_park_in(vehicle_no)
-    if not record:
-        response = {"status":"error",
-                    "message":"No Data Found in DB"}
-        return response
+    record,ph = get_park_in(vehicle_no)
     
     park_out_time = datetime.now()
     park_in_time = record.park_in_date
@@ -101,76 +53,88 @@ def park_out_generate(vehicle_no):
     }
     return response
 
-
-def payment_update(vehicle_no, amount_paid):
+def payment_update(vehicle_no,amount_paid):
 
     record, ph = get_latest_record(vehicle_no)
     if not record:
-        return {"status": "error", "message": "Error in database server."}
-
+        response = {"status":"error",
+                    "message":"Error in database server."}
+        return response
+    
     amount_due = record.park_fee - amount_paid
-
+    
     if not update_due(record, amount_due):
-        return {"status": "error", "message": "Error in database server."}
+        response = {"status":"error",
+                    "message":"Error in database server."}
+        return response
 
-    pdf_path = park_out_pdf(record, amount_due)
+    pdf_path = park_out_pdf(record,amount_due)
     if not pdf_path:
-        return {"status": "error", "message": "Error in creating PDF."}
-
+        response = {"status":"error",
+                    "message":"Error in creating PDF."}
+        return response
+    
     if not auto_print_pdf(pdf_path):
-        return {"status": "error", "message": "Error in printing PDF."}
-
+        response = {"status":"error",
+                    "message":"Error in printing PDF."}
+        return response
+    
     time.sleep(3)
     pyautogui.press('win')
     time.sleep(2)
     pyautogui.write('Messages')
     time.sleep(2)
     pyautogui.press('enter')
-
-    return {"status": "success", "message": "Parking saved and printed successfully!"}
-
-
-def park_out_pdf(record, amount_due):
-    out_invoice_path_pdf = os.path.join("parking_records", f"Out_invoice_{record.vehicle_no}.pdf")
-    PAGE_WIDTH  = 4 * inch
-    PAGE_HEIGHT = 6 * inch
+    
+    response={"status":"success",
+              "message":"Parking saved and printed successfully!"}
+    return response
+    
+def park_out_pdf(record,amount_due):
+    out_invoice_path_pdf = os.path.join("parking_records", f"Out_invoice_{record.vehicle_no}.pdf")  
+    PAGE_WIDTH = 4 * inch
+    PAGE_HEIGHT = 6* inch
 
     c = canvas.Canvas(out_invoice_path_pdf, pagesize=(PAGE_WIDTH, PAGE_HEIGHT))
-    y = PAGE_HEIGHT - 1 * cm
+
+    y = PAGE_HEIGHT - 1*cm
 
     y -= 15
     c.setFont("Times-Bold", 15)
-    c.drawString(0.5 * cm, y, "-" * 50)
+    c.drawString(0.5*cm, y, "-" *50)
     y -= 15
+
     c.setFont("Times-Bold", 17)
     c.drawCentredString(PAGE_WIDTH / 2, y, "INVOICE")
+    
     y -= 15
     c.setFont("Times-Bold", 15)
-    c.drawString(0.5 * cm, y, "-" * 50)
+    c.drawString(0.5*cm, y, "-" *50)
     y -= 18
-    c.drawString(0.5 * cm, y, f"Vehicle No   : {record.vehicle_no}")
+    c.drawString(0.5*cm, y, f"Vehicle No   : {record.vehicle_no}")
     y -= 15
     c.setFont("Times-Roman", 15)
-    c.drawString(0.5 * cm, y, f"Time OUT     : {record.park_out.strftime('%d-%m-%Y %I:%M %p')}")
+    c.drawString(0.5*cm, y, f"Time OUT     : {record.park_out.strftime('%d-%m-%Y %I:%M %p')}")
     y -= 18
-    c.drawString(0.5 * cm, y, f"Duration        : {record.no_of_days} day(s)")
+    c.drawString(0.5*cm, y, f"Duration        : {record.no_of_days} day(s)")
     y -= 18
     c.setFont("Times-Bold", 15)
-    c.drawString(0.5 * cm, y, f"Parking Fee  : Rs.{record.park_fee}/-")
+    c.drawString(0.5*cm, y, f"Parking Fee  : Rs.{record.park_fee}/-")
     y -= 18
     c.setFont("Times-Roman", 15)
-    c.drawString(0.5 * cm, y, f"Amount Due  : Rs.{amount_due}/-")
+    c.drawString(0.5*cm, y, f"Amount Due  : Rs.{amount_due}/-")
     y -= 18
-    c.drawString(0.5 * cm, y, "-" * 50)
+    c.drawString(0.5*cm, y, "-"*50)
     c.save()
     return out_invoice_path_pdf
 
-
-def park_out_msg(vehicle_no, save=False):
-    record, ph = get_latest_record(vehicle_no)
+def park_out_msg(vehicle_no,save=False):
+    record,ph = get_latest_record(vehicle_no)
     if not record:
-        return {"status": "error", "message": "Vehicle not found"}
-
+        response = {"status":"error",
+                    "message":"Vehicle not found"}
+        return response
+    
     message = (
         "K&K PARKING, ARANI\n"
         "-------------------------------------\n"
@@ -192,17 +156,24 @@ def park_out_msg(vehicle_no, save=False):
         "Thank you! visit again.\n"
         "-------------------------------------\n"
     )
-
     if save:
-        if not save_message(message, ph):
-            return {"status": "error", "message": "Error saving message in server."}
-        return {"status": "success", "message": "Successfully saved message!"}
-
-    elif not send(ph, message):
-        return {"status": "error", "message": "Server issue while sending message."}
-
+        if not save_message(message,ph):
+            response = {"status":"error",
+                        "message":"Error saving message in server."}
+            return response
+        response = {"status":"success",
+                    "message":"Successfully saved message!"}
+        return response
+    elif not send(ph,message):
+        response = {"status":"error",
+                    "message":"Server issue while sending message."}
+        return response
     pdf_path = os.path.join("parking_records", f"Invoice_{record.vehicle_no}.pdf")
-    if not delete_invoice(pdf_path):
-        return {"status": "error", "message": "Server issue while deleting PDFs."}
-
-    return {"status": "success", "message": "Message sent successfully!"}
+    if os.path.exists(pdf_path):
+        if not delete_invoice(pdf_path):
+            response = {"status":"error",
+                        "message":"Server issue while deleting PDFs."}
+            return response
+    response = {"status":"success",
+                "message":"Message send successfully!"}
+    return response

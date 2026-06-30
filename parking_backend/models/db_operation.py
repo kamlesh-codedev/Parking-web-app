@@ -70,6 +70,7 @@ def check_stats(vehicle_no):
         ParkingRecord.vehicle_no == vehicle_no,
         ParkingRecord.park_out == None
     ).first()
+    print(parked_in)
 
     if parked_in:
         return False
@@ -116,7 +117,6 @@ def get_park_in(vehicle_no):
             ParkingRecord.vehicle_no == vehicle_no,
             ParkingRecord.park_out == None
         )
-        .order_by(ParkingRecord.park_in_date.desc())
         .first()
     )
 

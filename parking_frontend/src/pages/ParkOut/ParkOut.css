@@ -661,6 +661,54 @@ body {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   INLINE ACTION BUTTONS
+───────────────────────────────────────────────────────────── */
+.po-inline-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.po-inline-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 10px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(39, 54, 71, 0.55);
+  color: var(--c-on-surface);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.po-inline-action-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(78,222,163,0.3);
+}
+
+.po-inline-action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+
+.po-inline-action-btn-primary {
+  background: rgba(78,222,163,0.12);
+  border-color: rgba(78,222,163,0.3);
+  color: var(--c-secondary);
+}
+
+.po-inline-action-btn-primary:hover:not(:disabled) {
+  background: rgba(78,222,163,0.2);
+}
+
+/* ─────────────────────────────────────────────────────────────
    ACTION BUTTONS
 ───────────────────────────────────────────────────────────── */
 .po-actions-grid {
