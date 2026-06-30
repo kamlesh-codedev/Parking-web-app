@@ -28,11 +28,11 @@ def get_vehicle_details():
 
 @park_in_bp.route('/generate-bill', methods=['POST'])
 def generate_bill():
-    if "vehicle_no" not in session or "bill_no" not in session:
+    if "vehicle_no" not in session:
         return jsonify({"status":"error",
                         "message":"Unauthorized Logic please login again"}), 401
     data = request.get_json()
-    if session.get("vehicle_no")!=data.get("vehicle_no"):
+    if session.get("vehicle_no")!=str(data.get("vehicle_no")).upper():
         return jsonify({"status":"error",
                         "message":"Unable to get Vehicle Number"})
     vehicle_no = session.get("vehicle_no")
