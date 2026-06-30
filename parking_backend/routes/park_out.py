@@ -19,6 +19,7 @@ def get_vehicle_numbers():
 def generate_bill():
     data = request.get_json()
     vehicle_no = data.get("vehicle_number")
+    vehicle_no = str(vehicle_no).strip().upper()
     session["vehicle_no"]=vehicle_no
     if not vehicle_no:
         return jsonify({"status":"error",
@@ -36,17 +37,11 @@ def generate_bill():
 @park_out_bp.post('/payment')
 def process_payment():
     data = request.get_json()
-    vehicle_no = data.get("vehicle_no")
-    if vehicle_no != session.get("vehicle_no"):
+    vehicle_no = data.get("vehicle_no","")
+    if vehicle_no != session.get("vehicle_no",""):
         return jsonify({"status":"error",
-                        "message":"Unable to get Vehicle Number"})
+                        "message":"Unable to get Vehicle Number"}), 400
     amount_paid = data.get("amount_paid")
-
-    if not vehicle_no:
-        vehicle_no = session.get("vehicle_no")
-    if not vehicle_no:
-        return jsonify({"status": "error",
-                        "message": "Unable to get Vehicle Number"}), 400
 
     # Step 1: commit park-out to DB
     checkout = park_out_generate(vehicle_no)
