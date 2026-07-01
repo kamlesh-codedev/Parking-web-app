@@ -88,10 +88,10 @@ def park_in_pdf(bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no):
     c.drawString(0.5*cm, y, f"Time IN          : {datetime.now().strftime('%d-%m-%Y %I:%M %p')}")
     y -= 18
     c.setFont("Times-Bold", 15)
-    c.drawString(0.5*cm, y, f"Parking Fee  : Rs.{amount} for 24 hrs")
+    c.drawString(0.5*cm, y, f"Parking Fee  : Rs.{int(amount)} for 24 hrs")
     y -= 18
     c.setFont("Times-Roman", 15)
-    c.drawString(0.5*cm, y, f"Pre Paid          : Rs.{prepaid}/-")
+    c.drawString(0.5*cm, y, f"Pre Paid          : Rs.{int(prepaid)}/-")
     y -= 18
     c.drawString(0.5*cm, y, f"Bill No           : {bill_no}")
     y -= 18
@@ -137,8 +137,8 @@ def park_in_msg(vehicle_no,save=False):
         f"Vehicle Name    : {record.vehicle_name}\n"
         f"Vehicle Number  : {record.vehicle_no}\n"
         f"Park In Time    : {record.park_in_date.strftime('%d-%m-%Y %I:%M %p')}\n"
-        f"Amount          : Rs.{record.amount} for 24 hours.\n"
-        f"Prepaid Amount  : Rs.{record.prepaid}/-\n"
+        f"Amount          : Rs.{int(record.amount)} for 24 hours.\n"
+        f"Prepaid Amount  : Rs.{int(record.prepaid)}/-\n"
         f"Bill Number     : {record.bill_no}\n"
         f"Phone Number    : {ph}\n"
         f"-------------------------------------\n"
@@ -149,7 +149,7 @@ def park_in_msg(vehicle_no,save=False):
         f"-------------------------------------\n"
     )
     if save:
-        if not save_message(message,ph):
+        if not save_message(record.vehicle_no,True):
             response = {"status":"error",
                         "message":"Error saving message in server."}
             return response

@@ -21,7 +21,7 @@ const ParkIn = () => {
   const [messageSent, setMessageSent] = useState(false);
 
   // API Base URL (adjust if your port is different)
-  const API_BASE = "http://localhost:5000/park-in";
+  const API_BASE = "api/park-in";
 
   // Live Calculations
   const parkingAmt = parseFloat(vehicleData.parkingAmount) || 0;
