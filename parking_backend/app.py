@@ -11,10 +11,10 @@ app.config.from_object(Config)
 CORS(app, supports_credentials=True)
 init_db()
 
-app.register_blueprint(park_in_bp, url_prefix="/park-in")
-app.register_blueprint(park_out_bp, url_prefix="/park-out")
-# app.register_blueprint(data_fetch_bp, url_prefix="/get-stats")
-app.register_blueprint(saved_msg_bp, url_prefix="/saved-msg")
+app.register_blueprint(park_in_bp, url_prefix="/api/park-in")
+app.register_blueprint(park_out_bp, url_prefix="/api/park-out")
+# app.register_blueprint(data_fetch_bp, url_prefix="/api/get-stats")
+app.register_blueprint(saved_msg_bp, url_prefix="/api/saved-msg")
 
 
 @app.teardown_appcontext
