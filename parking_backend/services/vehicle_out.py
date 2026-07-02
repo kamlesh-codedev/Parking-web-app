@@ -119,10 +119,10 @@ def park_out_pdf(record,amount_due):
     c.drawString(0.5*cm, y, f"Duration        : {record.no_of_days} day(s)")
     y -= 18
     c.setFont("Times-Bold", 15)
-    c.drawString(0.5*cm, y, f"Parking Fee  : Rs.{record.park_fee}/-")
+    c.drawString(0.5*cm, y, f"Parking Fee  : Rs.{int(record.park_fee)}/-")
     y -= 18
     c.setFont("Times-Roman", 15)
-    c.drawString(0.5*cm, y, f"Amount Due  : Rs.{amount_due}/-")
+    c.drawString(0.5*cm, y, f"Amount Due  : Rs.{int(amount_due)}/-")
     y -= 18
     c.drawString(0.5*cm, y, "-"*50)
     c.save()
@@ -145,10 +145,10 @@ def park_out_msg(vehicle_no,save=False):
         f"Park In Time    : {record.park_in_date.strftime('%d-%m-%Y %I:%M %p')}\n"
         f"Park Out Time   : {record.park_out.strftime('%d-%m-%Y %I:%M %p')}\n"
         f"Total Duration  : {record.no_of_days} day(s)\n"
-        f"Parking Fee     : Rs.{record.park_fee + record.prepaid}/-\n"
-        f"Amount Paid     : Rs.{record.park_fee + record.prepaid - record.amount_due}/-\n"
-        f"Prepaid Amount  : Rs.{record.prepaid}/-\n"
-        f"Amount Due      : Rs.{record.amount_due}/-\n"
+        f"Parking Fee     : Rs.{int(record.park_fee + record.prepaid)}/-\n"
+        f"Amount Paid     : Rs.{int(record.park_fee + record.prepaid - record.amount_due)}/-\n"
+        f"Prepaid Amount  : Rs.{int(record.prepaid)}/-\n"
+        f"Amount Due      : Rs.{int(record.amount_due)}/-\n"
         f"Bill Number     : {record.bill_no}\n"
         "-------------------------------------\n"
         "Whatsapp & Gpay ph: 9444718580\n"
