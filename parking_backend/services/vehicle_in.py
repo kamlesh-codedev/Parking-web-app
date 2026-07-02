@@ -149,7 +149,7 @@ def park_in_msg(vehicle_no,save=False):
         f"-------------------------------------\n"
     )
     if save:
-        if not save_message(record.vehicle_no,True):
+        if not save_message(record.vehicle_no, False):
             response = {"status":"error",
                         "message":"Error saving message in server."}
             return response

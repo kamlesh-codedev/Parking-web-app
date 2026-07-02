@@ -8,6 +8,7 @@ SAVE_FILE = "failed_messages.json"
 
 
 def save_message(vehicle_no, park_out_status):
+    park_out_status = bool(park_out_status)
     data = []
 
     if os.path.exists(SAVE_FILE):
@@ -16,8 +17,8 @@ def save_message(vehicle_no, park_out_status):
 
     # Prevent duplicate entries
     exists = any(
-        item["vehicle_no"] == vehicle_no and
-        item["park_out_status"] == park_out_status
+        item.get("vehicle_no") == vehicle_no and
+        bool(item.get("park_out_status")) == park_out_status
         for item in data
     )
 

@@ -503,6 +503,131 @@ body {
 .iv-empty-text { font-size: 0.9rem; }
 
 /* ============================================================
+   TWO-PANEL LAYOUT
+   ============================================================ */
+.iv-content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr);
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.iv-details-panel,
+.iv-list-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.iv-list-panel {
+  position: sticky;
+  top: 2.5rem;
+  align-self: start;
+  min-height: calc(100vh - 7rem);
+}
+
+.iv-list-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.iv-list-panel-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--iv-white);
+}
+
+.iv-list-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--iv-card-bg);
+  border: 1px solid var(--iv-input-border);
+  border-radius: var(--iv-radius-sm);
+  padding: 0.65rem 0.9rem;
+}
+
+.iv-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  width: 100%;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--iv-white);
+  border: 1px solid transparent;
+  border-radius: var(--iv-radius-sm);
+  padding: 1rem 1rem;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.2s, background 0.2s;
+}
+
+.iv-list-item:hover,
+.iv-list-item-active {
+  background: rgba(0, 212, 255, 0.1);
+  border-color: rgba(0, 212, 255, 0.22);
+  transform: translateX(1px);
+}
+
+.iv-list-item-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.iv-list-item-number {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--iv-white);
+}
+
+.iv-list-item-meta {
+  font-size: 0.78rem;
+  color: var(--iv-muted);
+}
+
+.iv-list-search-full {
+  width: 100%;
+}
+
+.iv-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(0, 212, 255, 0.12);
+  color: var(--iv-cyan);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.iv-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.iv-send-footer {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.iv-empty-bottom {
+  padding: 1.25rem 1rem;
+  border-radius: var(--iv-radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 1024px) {

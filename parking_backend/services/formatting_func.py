@@ -7,6 +7,7 @@ def parking_record_to_dict(record, phone):
         "park_in_date": record.park_in_date.isoformat() if record.park_in_date else None,
         "park_out": record.park_out.isoformat() if record.park_out else None,
         "no_of_days": record.no_of_days,
+        "park_out_status": True if record.park_out else False,
         "amount": record.amount,
         "prepaid": record.prepaid,
         "park_fee": record.park_fee,

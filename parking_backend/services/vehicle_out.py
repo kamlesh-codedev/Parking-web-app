@@ -157,7 +157,7 @@ def park_out_msg(vehicle_no,save=False):
         "-------------------------------------\n"
     )
     if save:
-        if not save_message(record.vehicle_no,False):
+        if not save_message(record.vehicle_no,True):
             response = {"status":"error",
                         "message":"Error saving message in server."}
             return response

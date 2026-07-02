@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, session,request
-from services import load_messages,park_in_msg,park_out_msg,parking_record_to_dict
+from services import load_messages,park_in_msg,park_out_msg,parking_record_to_dict,delete_message
 from models import get_latest_record
 
 saved_msg_bp = Blueprint('saved-msg',__name__)
@@ -52,14 +52,18 @@ def get_vehicle_details():
 def send_saved_msg():
     data = request.get_json()
     vehicle_no = data.get("vehicle_no","")
-    status = data.get("park_out_status")
+    status = data.get("park_out_status",False)
     if not status:
         response = park_in_msg(vehicle_no)
         if response.get("status")=="error":
             return jsonify(response), 500
+        elif(not delete_message(vehicle_no,status)):
+            return jsonify({"status":"error","message":"Server error while deleting messages."}), 500
         return jsonify(response), 200
     else:
         response = park_out_msg(vehicle_no)
         if response.get("status")=="error":
             return jsonify(response), 500
+        elif(not delete_message(vehicle_no,status)):
+            return jsonify({"status":"error","message":"Server error while deleting messages."}), 500
         return jsonify(response), 200
