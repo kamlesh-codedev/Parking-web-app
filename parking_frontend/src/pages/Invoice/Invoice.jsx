@@ -1,98 +1,104 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import './Invoice.css';
 import logo from '../../assets/kk-logo.png';
-import { Link } from "react-router-dom"; // Requirement 1
+import { Link } from "react-router-dom";
 
-/* ── Sample phone list for dropdown ── */
-const PHONE_LIST = [
-  { phone: '+91 98765 43210', name: 'Ravi Kumar' },
-  { phone: '+91 91234 56789', name: 'Priya Sharma' },
-  { phone: '+91 80001 11222', name: 'Arun Mehta' },
-  { phone: '+91 77890 00123', name: 'Sneha Iyer' },
-];
-
-/* ── Sample invoice data keyed by phone ── */
-const INVOICE_MAP = {
-  '+91 98765 43210': {
-    vehicleName:   'Honda Activa',
-    vehicleNumber: 'TN 25 AB 1234',
-    parkInTime:    '29 Jun 2026, 10:30 AM',
-    prepaidAmount: '₹90',
-    billNumber:    'KK-893636',
-    driverPhone:   '+91 98765 43210',
-  },
-  '+91 91234 56789': {
-    vehicleName:   'TVS Jupiter',
-    vehicleNumber: 'TN 09 CD 5678',
-    parkInTime:    '29 Jun 2026, 11:00 AM',
-    prepaidAmount: '₹60',
-    billNumber:    'KK-893637',
-    driverPhone:   '+91 91234 56789',
-  },
-};
+const API_BASE = "/api/saved-msg"; // adjust to match your blueprint's registered url_prefix
 
 const Invoice = () => {
-  const [phoneSearch, setPhoneSearch] = useState('');
+  const [vehicleNo, setVehicleNo]     = useState('');
   const [invoice, setInvoice]         = useState(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [filteredList, setFilteredList] = useState(PHONE_LIST);
-  const wrapRef = useRef(null);
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState('');
+  const [sending, setSending]         = useState(false);
+  const [sendResult, setSendResult]   = useState('');
+  // Backend distinguishes park-in vs park-out message by presence of park_out_status.
+  // Since there's no endpoint telling us the vehicle's current status, expose it as a
+  // manual toggle until the backend adds that info.
+  const [isParkOut, setIsParkOut]     = useState(false);
 
-  /* Close dropdown on outside click */
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  /* Filter list as user types */
   const handleInputChange = (e) => {
-    const val = e.target.value;
-    setPhoneSearch(val);
-    setFilteredList(
-      PHONE_LIST.filter(
-        (p) =>
-          p.phone.includes(val) ||
-          p.name.toLowerCase().includes(val.toLowerCase())
-      )
-    );
-    setDropdownOpen(true);
+    setVehicleNo(e.target.value);
   };
 
-  const handleSelectPhone = (phone) => {
-    setPhoneSearch(phone);
-    setDropdownOpen(false);
-    setInvoice(INVOICE_MAP[phone] || null);
+  const handleSearch = async () => {
+    setError('');
+    setInvoice(null);
+    setSendResult('');
+
+    if (!vehicleNo.trim()) {
+      setError('Vehicle number is required.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/get-message-details`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vehicle_no: vehicleNo }),
+      });
+      const json = await res.json();
+
+      if (!res.ok || json.status === 'error') {
+        setError(json.message || 'Vehicle not found.');
+        setInvoice(null);
+        return;
+      }
+
+      setInvoice(json.data);
+    } catch (err) {
+      setError('Something went wrong while fetching invoice details.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSearch = () => {
-    setDropdownOpen(false);
-    setInvoice(INVOICE_MAP[phoneSearch] || null);
-    console.log('Searching phone:', phoneSearch);
-  };
+  const handleSendMessage = async () => {
+    setSendResult('');
+    setError('');
 
-  const handleSendMessage = () => {
-    console.log('Sending message to:', phoneSearch);
+    if (!vehicleNo.trim()) {
+      setError('Vehicle number is required.');
+      return;
+    }
+
+    setSending(true);
+    try {
+      const body = { vehicle_no: vehicleNo };
+      if (isParkOut) {
+        // Backend only checks truthiness of park_out_status to branch logic.
+        body.park_out_status = true;
+      }
+
+      const res = await fetch(`${API_BASE}/send-saved-msg`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+
+      if (!res.ok || json.status === 'error') {
+        setError(json.message || 'Failed to send message.');
+        return;
+      }
+
+      setSendResult(json.message || 'Message sent successfully.');
+    } catch (err) {
+      setError('Something went wrong while sending the message.');
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') handleSearch();
-    if (e.key === 'Escape') setDropdownOpen(false);
-  };
-
-  const toggleDropdown = () => {
-    setFilteredList(PHONE_LIST);
-    setDropdownOpen((prev) => !prev);
   };
 
   return (
     <div className="iv-container">
 
-      {/* ── Sidebar — Requirement 2, 3 & 4 ── */}
+      {/* ── Sidebar ── */}
       <aside className="pi-sidebar">
         <div className="pi-sidebar-logo">
           <img src={logo} alt="KK Parking" className="pi-logo" />
@@ -111,7 +117,6 @@ const Invoice = () => {
             <span className="pi-icon">logout</span>
             <span>Park-Out</span>
           </Link>
-          {/* Reports menu item kept, but navigation disabled */}
           <Link to="#" className="pi-nav-item">
             <span className="pi-icon">analytics</span>
             <span>Reports</span>
@@ -143,7 +148,6 @@ const Invoice = () => {
       {/* ── Main ── */}
       <main className="iv-main">
 
-        {/* Page header */}
         <header className="iv-page-header">
           <div className="iv-header-title">
             <span className="pi-icon iv-header-icon">receipt_long</span>
@@ -152,91 +156,90 @@ const Invoice = () => {
           <p className="iv-page-subtitle">View invoice details and send invoice messages.</p>
         </header>
 
-        {/* Back link */}
         <Link to="/dashboard" className="iv-back-link">
           <span className="pi-icon iv-back-icon">arrow_back</span>
           Back to Dashboard
         </Link>
 
-        {/* Search row */}
+        {/* Search row — now searches by Vehicle Number, matching backend */}
         <div className="iv-search-row">
 
-          {/* Phone input + dropdown */}
-          <div className="iv-phone-wrap" ref={wrapRef}>
-            <span className="pi-icon iv-phone-icon">call</span>
+          <div className="iv-phone-wrap">
+            <span className="pi-icon iv-phone-icon">directions_car</span>
             <input
               className="iv-phone-input"
               type="text"
-              placeholder="Enter Phone Number..."
-              value={phoneSearch}
+              placeholder="Enter Vehicle Number..."
+              value={vehicleNo}
               onChange={handleInputChange}
-              onFocus={() => { setFilteredList(PHONE_LIST); setDropdownOpen(true); }}
               onKeyDown={handleKeyDown}
             />
-            <span
-              className={`pi-icon iv-phone-chevron ${dropdownOpen ? 'iv-chevron-open' : ''}`}
-              onClick={toggleDropdown}
-            >
-              expand_more
-            </span>
-
-            {/* Dropdown list */}
-            {dropdownOpen && filteredList.length > 0 && (
-              <ul className="iv-dropdown">
-                {filteredList.map((item) => (
-                  <li
-                    key={item.phone}
-                    className="iv-dropdown-item"
-                    onMouseDown={() => handleSelectPhone(item.phone)}
-                  >
-                    <span className="pi-icon iv-dd-icon">call</span>
-                    <div className="iv-dd-text">
-                      <span className="iv-dd-phone">{item.phone}</span>
-                      <span className="iv-dd-name">{item.name}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
           </div>
 
-          <button className="iv-btn-search" onClick={handleSearch}>
+          <button className="iv-btn-search" onClick={handleSearch} disabled={loading}>
             <span className="pi-icon iv-btn-icon">search</span>
-            Search
+            {loading ? 'Searching...' : 'Search'}
           </button>
 
-          <button className="iv-btn-send" onClick={handleSendMessage}>
+          <button className="iv-btn-send" onClick={handleSendMessage} disabled={sending || !invoice}>
             <span className="pi-icon iv-btn-icon">send</span>
-            Send Message
+            {sending ? 'Sending...' : 'Send Message'}
           </button>
         </div>
 
-        {/* Invoice details card */}
+        {/* Park-out toggle — needed because backend branches on park_out_status,
+            and there's currently no endpoint indicating vehicle status automatically. */}
+        {invoice && (
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '0.85rem', color: 'var(--iv-muted)' }}>
+            <input
+              type="checkbox"
+              checked={isParkOut}
+              onChange={(e) => setIsParkOut(e.target.checked)}
+            />
+            Send as Park-Out message
+          </label>
+        )}
+
+        {error && (
+          <div className="iv-empty">
+            <span className="pi-icon iv-empty-icon">error_outline</span>
+            <p className="iv-empty-text">{error}</p>
+          </div>
+        )}
+
+        {sendResult && (
+          <div className="iv-empty">
+            <span className="pi-icon iv-empty-icon">check_circle</span>
+            <p className="iv-empty-text">{sendResult}</p>
+          </div>
+        )}
+
+        {/* Invoice details card — field names are best-guess from parking_record_to_dict.
+            Confirm/adjust keys against actual backend dict output. */}
         {invoice && (
           <div className="iv-card">
 
-            {/* Card header */}
             <div className="iv-card-header">
               <span className="iv-card-header-icon-wrap">
                 <span className="pi-icon iv-card-icon">receipt</span>
               </span>
               <div>
                 <h2 className="iv-card-title">Invoice Details</h2>
-                <p className="iv-card-bill-no">Bill #{invoice.billNumber}</p>
+                <p className="iv-card-bill-no">Bill #{invoice.bill_number || invoice.billNumber || '—'}</p>
               </div>
             </div>
 
-            {/* Details grid */}
             <div className="iv-details-grid">
 
-              {/* Left column */}
               <div className="iv-details-col">
                 <div className="iv-detail-row">
                   <div className="iv-detail-key">
                     <span className="pi-icon iv-detail-icon">directions_car</span>
                     <span className="iv-detail-label">Vehicle Name</span>
                   </div>
-                  <span className="iv-detail-value">{invoice.vehicleName}</span>
+                  <span className="iv-detail-value">
+                    {invoice.vehicle_name || invoice.vehicleName || '—'}
+                  </span>
                 </div>
 
                 <div className="iv-detail-row">
@@ -245,7 +248,7 @@ const Invoice = () => {
                     <span className="iv-detail-label">Vehicle Number</span>
                   </div>
                   <span className="iv-detail-value iv-detail-mono iv-detail-bold">
-                    {invoice.vehicleNumber}
+                    {invoice.vehicle_number || invoice.vehicleNumber || vehicleNo}
                   </span>
                 </div>
 
@@ -254,11 +257,12 @@ const Invoice = () => {
                     <span className="pi-icon iv-detail-icon">schedule</span>
                     <span className="iv-detail-label">Park-In Time</span>
                   </div>
-                  <span className="iv-detail-value">{invoice.parkInTime}</span>
+                  <span className="iv-detail-value">
+                    {invoice.park_in_time || invoice.parkInTime || '—'}
+                  </span>
                 </div>
               </div>
 
-              {/* Right column */}
               <div className="iv-details-col">
                 <div className="iv-detail-row">
                   <div className="iv-detail-key">
@@ -266,7 +270,7 @@ const Invoice = () => {
                     <span className="iv-detail-label">Prepaid Amount</span>
                   </div>
                   <span className="iv-detail-value iv-detail-bold iv-detail-accent">
-                    {invoice.prepaidAmount}
+                    {invoice.prepaid_amount || invoice.prepaidAmount || '—'}
                   </span>
                 </div>
 
@@ -275,7 +279,9 @@ const Invoice = () => {
                     <span className="pi-icon iv-detail-icon">receipt_long</span>
                     <span className="iv-detail-label">Bill Number</span>
                   </div>
-                  <span className="iv-detail-value iv-detail-mono">{invoice.billNumber}</span>
+                  <span className="iv-detail-value iv-detail-mono">
+                    {invoice.bill_number || invoice.billNumber || '—'}
+                  </span>
                 </div>
 
                 <div className="iv-detail-row iv-detail-row-last">
@@ -283,7 +289,9 @@ const Invoice = () => {
                     <span className="pi-icon iv-detail-icon">call</span>
                     <span className="iv-detail-label">Driver Phone Number</span>
                   </div>
-                  <span className="iv-detail-value">{invoice.driverPhone}</span>
+                  <span className="iv-detail-value">
+                    {invoice.driver_phone || invoice.phone || invoice.driverPhone || '—'}
+                  </span>
                 </div>
               </div>
 
@@ -291,11 +299,11 @@ const Invoice = () => {
           </div>
         )}
 
-        {/* Empty state when no invoice found */}
-        {!invoice && phoneSearch && (
+        {/* Empty state — no invoice, not loading, searched already, no error shown separately */}
+        {!invoice && !loading && !error && vehicleNo && (
           <div className="iv-empty">
             <span className="pi-icon iv-empty-icon">search_off</span>
-            <p className="iv-empty-text">No invoice found for this number.</p>
+            <p className="iv-empty-text">No invoice found for this vehicle number.</p>
           </div>
         )}
 

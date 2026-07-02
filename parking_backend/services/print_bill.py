@@ -3,7 +3,7 @@ import os
 
 SAVE_FILE = "failed_messages.json"
 
-SUMATRA_PATH = r"C:\Users\DELL\AppData\Local\SumatraPDF\SumatraPDF.exe"
+SUMATRA_PATH = r"C:\Users\lathe\AppData\Local\SumatraPDF\SumatraPDF.exe"
 
 def auto_print_pdf(file_path, printer_name=None):
     if not os.path.exists(file_path):
