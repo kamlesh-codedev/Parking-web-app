@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from config import Config
 from database import db_session,init_db
-from routes import park_in_bp,park_out_bp,saved_msg_bp
+from routes import park_in_bp,park_out_bp,saved_msg_bp,login_bp
 
 
 app = Flask(__name__)
@@ -15,6 +15,7 @@ app.register_blueprint(park_in_bp, url_prefix="/api/park-in")
 app.register_blueprint(park_out_bp, url_prefix="/api/park-out")
 # app.register_blueprint(data_fetch_bp, url_prefix="/api/get-stats")
 app.register_blueprint(saved_msg_bp, url_prefix="/api/saved-msg")
+app.register_blueprint(login_bp,url_prefix="/api/login")
 
 
 @app.teardown_appcontext
