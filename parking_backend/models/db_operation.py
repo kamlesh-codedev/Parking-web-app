@@ -70,7 +70,6 @@ def check_stats(vehicle_no):
         ParkingRecord.vehicle_no == vehicle_no,
         ParkingRecord.park_out == None
     ).first()
-    print(parked_in)
 
     if parked_in:
         return False
@@ -122,6 +121,7 @@ def get_park_in(vehicle_no):
 
     if not record:
         return 0,0
+    return record,"1234567890"
 
     vehicle = (
         db_session.query(Vehicle)
