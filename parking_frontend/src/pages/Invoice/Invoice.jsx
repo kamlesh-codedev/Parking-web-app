@@ -114,7 +114,7 @@ const Invoice = () => {
     }
   };
 
-  const handleSendMessage = async () => {
+const handleSendMessage = async () => {
     if (!selectedMessage) {
       setError('Please select a vehicle before sending.');
       return;
@@ -123,6 +123,7 @@ const Invoice = () => {
     setError('');
     setSendResult('');
     setSending(true);
+    setSendEnabled(false); // block immediately on click
 
     try {
       const body = { vehicle_no: selectedMessage.vehicle_no };
@@ -139,13 +140,25 @@ const Invoice = () => {
 
       if (!res.ok || json.status === 'error') {
         setError(json.message || 'Failed to send message.');
+        setSendEnabled(false);
         return;
       }
 
       setSendResult(json.message || 'Message sent successfully.');
       setSendEnabled(false);
+
+      // Clear invoice and refresh after 1.5 seconds
+      setTimeout(() => {
+        setSelectedMessage(null);
+        setInvoice(null);
+        setSendResult('');
+        setError('');
+        loadSavedMessages(); // refresh the vehicle list
+      }, 1500);
+
     } catch (err) {
       setError('Something went wrong while sending the message.');
+      setSendEnabled(false);
     } finally {
       setSending(false);
     }
