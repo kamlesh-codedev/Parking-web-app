@@ -46,8 +46,7 @@ const ParkIn = () => {
   const isFormValid =
     vehicleData.vehicleNumber &&
     parkingAmt > 0 &&
-    prepaidAmt >= 0 &&
-    prepaidAmt <= parkingAmt;
+    prepaidAmt >= 0;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

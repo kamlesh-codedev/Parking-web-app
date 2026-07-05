@@ -48,7 +48,7 @@ def get_dashboard_data():
     # 3. Today's Revenue
     # -----------------------------
     today_revenue = (
-        db_session.query(func.sum(ParkingRecord.amount))
+        db_session.query(func.sum(ParkingRecord.prepaid + ParkingRecord.park_fee))
         .filter(
             ParkingRecord.park_out >= today_start,
             ParkingRecord.park_out < tomorrow_start,
@@ -61,7 +61,7 @@ def get_dashboard_data():
     # 4. This Month Revenue
     # -----------------------------
     month_revenue = (
-        db_session.query(func.sum(ParkingRecord.amount))
+        db_session.query(func.sum(ParkingRecord.prepaid + ParkingRecord.park_fee))
         .filter(
             ParkingRecord.park_out != None,
             ParkingRecord.park_out >= month_start,
