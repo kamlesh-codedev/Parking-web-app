@@ -7,6 +7,8 @@ import re
 import pyperclip
 import os
 from pathlib import Path
+import tkinter as tk
+from tkinter import messagebox
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 BACKEND_DIR = PROJECT_ROOT / "parking_backend"
@@ -123,6 +125,101 @@ def stop_everything():
 
     print("Stopped.")
 
+def show_launcher(url):
+
+    root = tk.Tk()
+    root.title("KK Parking System")
+    root.geometry("650x420")
+    root.resizable(False, False)
+
+    def copy_url():
+        pyperclip.copy(url)
+        copy_btn.config(text="✓ Copied")
+
+        root.after(
+            2000,
+            lambda: copy_btn.config(text="Copy URL")
+        )
+
+    def stop_system():
+
+        if not messagebox.askyesno(
+            "Stop System",
+            "Are you sure you want to stop the Parking System?"
+        ):
+            return
+
+        stop_everything()
+        root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", stop_system)
+
+    tk.Label(
+        root,
+        text="KK PARKING SYSTEM",
+        font=("Segoe UI", 20, "bold")
+    ).pack(pady=15)
+
+    frame = tk.Frame(root)
+    frame.pack()
+
+    status_font = ("Segoe UI", 11)
+
+    STATUS_OK = "●"
+    STATUS_WAIT = "◐"
+    STATUS_ERROR = "✖"
+    
+    tk.Label(frame, text="🟢 Server", width=18, anchor="w", font=status_font).grid(row=0, column=0, padx=15, pady=5)
+    tk.Label(frame, text="Running", anchor="w", font=status_font).grid(row=0, column=1)
+
+    tk.Label(frame, text="🟢 Cloudflare", width=18, anchor="w", font=status_font).grid(row=1, column=0, padx=15, pady=5)
+    tk.Label(frame, text="Connected", anchor="w", font=status_font).grid(row=1, column=1)
+
+    tk.Label(frame, text="🟢 Database", width=18, anchor="w", font=status_font).grid(row=2, column=0, padx=15, pady=5)
+    tk.Label(frame, text="Ready", anchor="w", font=status_font).grid(row=2, column=1)
+
+    tk.Label(frame, text="🟢 Printer", width=18, anchor="w", font=status_font).grid(row=3, column=0, padx=15, pady=5)
+    tk.Label(frame, text="Ready", anchor="w", font=status_font).grid(row=3, column=1)
+
+    tk.Label(
+        root,
+        text="\nRemote Access URL",
+        font=("Segoe UI", 12, "bold")
+    ).pack()
+
+    url_box = tk.Entry(
+        root,
+        width=75,
+        justify="center",
+        font=("Consolas", 10)
+    )
+
+    url_box.pack(pady=10)
+    url_box.insert(0, url)
+    url_box.config(state="readonly")
+
+    button_frame = tk.Frame(root)
+    button_frame.pack(pady=25)
+
+    copy_btn = tk.Button(
+        button_frame,
+        text="Copy URL",
+        width=18,
+        command=copy_url
+    )
+
+    copy_btn.grid(row=0, column=0, padx=10)
+
+    tk.Button(
+        button_frame,
+        text="Stop System",
+        width=18,
+        bg="#d9534f",
+        fg="white",
+        command=stop_system
+    ).grid(row=0, column=1, padx=10)
+
+    root.mainloop()
 
 if __name__ == "__main__":
 
@@ -142,15 +239,7 @@ if __name__ == "__main__":
 
         open_browser()
 
-        print("\n===================================")
-        print("KK PARKING SYSTEM READY")
-        print("===================================")
-        print(tunnel_url)
-        print("Copied to Clipboard")
-        print("Saved to Desktop")
-        print("===================================\n")
-
-        input("Press ENTER to Exit...")
+        show_launcher(tunnel_url)
 
     finally:
 
