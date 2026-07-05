@@ -197,7 +197,7 @@ const ParkIn = () => {
   };
 
   const canSearch = !loading && !!vehicleData.vehicleNumber;
-  const canGenerateBill = !loading && !billGenerated && !!vehicleData.vehicleNumber && parkingAmt > 0 && prepaidAmt >= 0 && prepaidAmt <= parkingAmt;
+  const canGenerateBill = !loading && !billGenerated && !!vehicleData.vehicleNumber && parkingAmt > 0 && prepaidAmt >= 0;
   const canSaveMessage = billGenerated && !messageSaved && !loading;
   const canSendMessage = billGenerated && !loading;
 
@@ -344,7 +344,7 @@ const ParkIn = () => {
                 <div className="pi-input-wrap">
                   <span className="pi-currency-symbol">₹</span>
                   <input
-                    className={`pi-input pi-input-currency ${prepaidAmt > parkingAmt ? 'pi-input--error' : ''}`}
+                    className={`pi-input pi-input-currency`}
                     type="number"
                     name="prepaidAmount"
                     value={vehicleData.prepaidAmount}
@@ -353,11 +353,6 @@ const ParkIn = () => {
                     placeholder="Enter amount paid"
                   />
                 </div>
-                {prepaidAmt > parkingAmt && (
-                   <span className="pi-validation-msg pi-validation-msg--error">
-                     <span className="pi-icon">error</span> Prepaid cannot exceed Total.
-                   </span>
-                )}
               </div>
             )}
 
