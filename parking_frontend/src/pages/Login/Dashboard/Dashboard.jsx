@@ -3,7 +3,7 @@ import logo from "../../../assets/kk-logo.png";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = "";
 
 function Dashboard() {
   const [stats, setStats] = useState(null);
