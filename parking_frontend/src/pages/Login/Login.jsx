@@ -1,9 +1,10 @@
 import "./Login.css";
-import RecoverKey from "./RecoveryKey.jsx";
+import RecoverKey from "./RecoveryKey";
 import logo from "../../assets/kk-logo.png";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { setLoggedIn } from "../../utils/auth";
+import { Link } from "react-router-dom";
 
 const API_BASE_URL = "/api";
 
@@ -88,7 +89,7 @@ function Login() {
           </div>
         )}
         <div className="options">
-          <Route path="/recover-key" element = {<RecoverKey/>} />
+          <Link to="/recover-key">Recover Key</Link>
         </div>
 
         <button onClick={handleLogin} disabled={isLoading}>

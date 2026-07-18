@@ -4,6 +4,7 @@ from flask_cors import CORS
 from config import Config
 from database import db_session,init_db
 from routes import park_in_bp,park_out_bp,saved_msg_bp,login_bp,dashboard_bp
+from services import seed_user
 
 
 frontend_dist = os.path.join(
@@ -29,6 +30,7 @@ app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
 app.register_blueprint(saved_msg_bp, url_prefix="/api/saved-msg")
 app.register_blueprint(login_bp,url_prefix="/api/login")
 
+seed_user()
 
 @app.route("/")
 def index():

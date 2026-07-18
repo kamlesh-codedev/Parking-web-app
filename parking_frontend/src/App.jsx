@@ -5,6 +5,7 @@ import Dashboard from "./pages/Login/Dashboard/Dashboard";
 import ParkIn from "./pages/ParkIn/ParkIn";
 import ParkOut from "./pages/ParkOut/ParkOut";
 import Invoice from "./pages/Invoice/Invoice";
+import RecoverKey from "./pages/Login/RecoveryKey";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       <Route path="/parkin" element={<ParkIn />} />
       <Route path="/parkout" element={<ParkOut />} /> 
       <Route path="/invoice" element={<Invoice/>}/>
+      <Route path="/recover-key" element={<RecoverKey />} />
     </Routes>
   );
 }

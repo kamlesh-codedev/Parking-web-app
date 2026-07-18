@@ -7,6 +7,18 @@ from models import Users
 # Password Functions
 # -------------------------
 
+def seed_user():
+    user = Users(
+        username="admin",
+        password=hash_text("admin123"),
+        security_question="What is your favourite color?",
+        security_answer=hash_text("Blue")
+    )
+
+    db_session.add(user)
+    db_session.commit()
+
+
 def hash_text(text: str) -> str:
     """
     Hash any text (password or security answer).
@@ -116,6 +128,8 @@ def reset_password(username: str, new_password: str) -> bool:
 
     return True
 
+if __name__ == "__main__":
+    seed_user()
 
 # -------------------------
 # Change Password
