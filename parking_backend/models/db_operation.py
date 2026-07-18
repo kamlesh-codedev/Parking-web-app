@@ -5,6 +5,27 @@ from models import Base
 from services.pdf_handling import delete_invoice
 import os
 
+class Users(Base):
+    __tablename__ = "login"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    username = Column(String(100), unique=True, nullable=False)
+
+    password = Column(String(255), nullable=False)
+
+    security_question = Column(String(255), nullable=True)
+
+    security_answer = Column(String(255), nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
 
 class ParkingRecord(Base):
     __tablename__ = "records"

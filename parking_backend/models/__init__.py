@@ -5,6 +5,7 @@ Base = declarative_base()
 from models.db_operation import (
     ParkingRecord,
     Vehicle,
+    Users,
     get_vehicle_info,
     update_vehicle_info,
     create_vehicle_info,
