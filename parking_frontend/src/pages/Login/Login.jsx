@@ -1,4 +1,5 @@
 import "./Login.css";
+import RecoverKey from "./RecoveryKey.jsx";
 import logo from "../../assets/kk-logo.png";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -86,9 +87,8 @@ function Login() {
             {error}
           </div>
         )}
-
         <div className="options">
-          <a href="/">Recover Key</a>
+          <Route path="/recover-key" element = {<RecoverKey/>} />
         </div>
 
         <button onClick={handleLogin} disabled={isLoading}>

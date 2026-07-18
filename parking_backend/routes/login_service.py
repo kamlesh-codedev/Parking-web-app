@@ -33,6 +33,7 @@ def verify_user():
          return jsonify({"status":"failed",
                          "messsage":"User Not found"}),404
     else:
+         session["username"] = username
          return jsonify({"status":"success",
                          "question":question}),200
 

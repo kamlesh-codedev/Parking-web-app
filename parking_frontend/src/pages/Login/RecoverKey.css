@@ -1,0 +1,68 @@
+/* Extends Login.css — import that first, this only adds recovery-specific bits */
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.step-indicator .step,
+.step-indicator .step.done {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #a5b0c0;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #324e72;
+  transition: all 0.2s;
+}
+
+.step-indicator .step.active {
+  color: #071426;
+  background: #00d4ff;
+  border-color: #00d4ff;
+  box-shadow: 0 0 14px rgba(0, 212, 255, 0.5);
+}
+
+.step-indicator .step.done {
+  color: #00d4ff;
+  border-color: #00d4ff;
+}
+
+.step-indicator .step-line {
+  width: 40px;
+  height: 1px;
+  background: #324e72;
+}
+
+.security-question {
+  text-align: left;
+  color: #bfc8d8;
+  font-size: 13px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid #324e72;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 15px;
+}
+
+.form-error {
+  color: #ff6b6b;
+  font-size: 13px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.form-success {
+  color: #4ade80;
+  font-size: 13px;
+  margin-bottom: 12px;
+  text-align: left;
+}
