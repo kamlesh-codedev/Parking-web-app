@@ -82,7 +82,7 @@ def payment_update(vehicle_no,amount_paid):
     time.sleep(3)
     pyautogui.press('win')
     time.sleep(2)
-    pyautogui.write('Messages')
+    pyautogui.write('Apps: messages')
     time.sleep(2)
     pyautogui.press('enter')
     
@@ -136,7 +136,7 @@ def park_out_msg(vehicle_no,save=False):
         return response
     
     message = (
-        "K&K PARKING, ARANI\n"
+        "Advanced Parking Management\n"
         "-------------------------------------\n"
         "                   INVOICE\n"
         "-------------------------------------\n"
@@ -151,7 +151,7 @@ def park_out_msg(vehicle_no,save=False):
         f"Amount Due      : Rs.{int(record.amount_due)}/-\n"
         f"Bill Number     : {record.bill_no}\n"
         "-------------------------------------\n"
-        "Whatsapp & Gpay ph: 9444718580\n"
+        "Whatsapp & Gpay ph: 1234567890\n"
         "-------------------------------------\n"
         "Thank you! visit again.\n"
         "-------------------------------------\n"

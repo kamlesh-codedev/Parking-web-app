@@ -16,7 +16,10 @@ def seed_user():
     )
 
     db_session.add(user)
-    db_session.commit()
+    try:
+        db_session.commit()
+    except Exception:
+        db_session.rollback()
 
 
 def hash_text(text: str) -> str:

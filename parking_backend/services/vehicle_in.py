@@ -53,7 +53,7 @@ def park_in_generate(bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no):
     time.sleep(3)
     pyautogui.press('win')
     time.sleep(2)
-    pyautogui.write('Messages')
+    pyautogui.write('Apps: messages')
     time.sleep(2)
     pyautogui.press('enter')
     
@@ -72,7 +72,7 @@ def park_in_pdf(bill_no,vehicle_no,vehicle_name,amount,prepaid,ph_no):
     y = PAGE_HEIGHT - 1*cm
 
     c.setFont("Times-Bold", 17)
-    c.drawCentredString(PAGE_WIDTH / 2, y, "K&K PARKING - ARANI")
+    c.drawCentredString(PAGE_WIDTH / 2, y, "Advanced Parking Management")
     
     y -= 15
     c.setFont("Times-Bold", 15)
@@ -130,7 +130,7 @@ def park_in_msg(vehicle_no,save=False):
                     "message":"Vehicle not found"}
         return response
     message = (
-        f"K&K PARKING, ARANI\n"
+        f"Advanced Parking Management\n"
         f"-------------------------------------\n"
         f"                 INVOICE \n"
         f"-------------------------------------\n"
@@ -142,7 +142,7 @@ def park_in_msg(vehicle_no,save=False):
         f"Bill Number     : {record.bill_no}\n"
         f"Phone Number    : {ph}\n"
         f"-------------------------------------\n"
-        f"Whatsapp & Gpay ph: 9444718580\n"
+        f"Whatsapp & Gpay ph: 1234567890\n"
         f"-------------------------------------\n"
         f"Please keep this receipt safe for proofs\n"
         f"when you check out.\n"
